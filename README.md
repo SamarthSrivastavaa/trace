@@ -56,7 +56,7 @@ Honest novelty score for the mechanism: low. The domain transfer and trust model
 pip install -r requirements.txt
 python -m pramaan demo                       # all four beats + cooldown lifecycle
 python -m pramaan recheck --db pramaan.db --all
-python -m pytest tests/ -q                   # 379 tests, fully offline
+python -m pytest tests/ -q                   # 391 tests, fully offline
 ```
 
 The default configuration is fully simulated. `python -m pramaan status` prints the mode banner; simulated state is never displayed as live.
@@ -156,7 +156,7 @@ retry commit             → already_committed, still one row
 
 | Component | Status |
 |---|---|
-| Deterministic core | **Working**, 379 offline tests |
+| Deterministic core | **Working**, 391 offline tests |
 | Fixture state provider | **Working**, SIMULATED, no credentials |
 | Anthropic proposer | **Adapter complete, tested against a fake transport. No live call has ever been made.** |
 | Razorpay state provider | **Boundary skeleton only.** 8 of 12 field mappings unresolved; `get_state` raises rather than guessing endpoint shapes |
@@ -192,7 +192,7 @@ Frozen at `phase3-freeze` = `8b0d3753`, dataset `f3b65c56…`, prompt `proposer-
 ## Testing
 
 ```bash
-python -m pytest tests/ -q          # 379 tests, ~12s, no credentials, no network
+python -m pytest tests/ -q          # 391 tests, ~17s, no credentials, no network
 ```
 
 | Area | Tests |

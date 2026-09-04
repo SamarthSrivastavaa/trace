@@ -203,3 +203,135 @@ def test_docs_contain_no_secrets():
         assert "sk-ant" not in doc
         assert "rzp_live" not in doc
         assert not re.search(r"rzp_test_[A-Za-z0-9]{6,}", doc)
+
+
+# --- demo artifacts: every runbook command must actually run ---------------
+
+RUNBOOK = (ROOT / "DEMO_RUNBOOK.md").read_text(encoding="utf-8")
+SCRIPT = (ROOT / "VIDEO_SCRIPT.md").read_text(encoding="utf-8")
+
+
+def test_demo_artifacts_exist():
+    assert (ROOT / "DEMO_RUNBOOK.md").is_file()
+    assert (ROOT / "VIDEO_SCRIPT.md").is_file()
+    assert (ROOT / "scripts" / "tamper_demo.py").is_file()
+
+
+def test_full_demo_sequence_runs_offline(tmp_path):
+    """C1 -> C2 -> C3: demo, clean replay, tamper, failing replay."""
+    db = str(tmp_path / "runbook.db")
+
+    demo = run(sys.executable, "-m", "pramaan", "--db", db, "demo")
+    assert demo.returncode == 0, demo.stderr
+    for line in ("model=MOCK", "final_attempt  -> SEND",
+                 "first_attempt  -> BLOCK", "-> ESCALATE",
+                 "coverage_passed=False", "deliver + commit  -> created",
+                 "COOLDOWN_NOT_ELAPSED"):
+        assert line in demo.stdout, f"demo missing {line!r}"
+
+    clean = run(sys.executable, "-m", "pramaan", "--db", db, "recheck", "--all")
+    assert clean.returncode == 0, clean.stdout
+    assert "re-verified (no model calls, no network)" in clean.stdout
+
+    tamper = run(sys.executable, "scripts/tamper_demo.py", db)
+    assert tamper.returncode == 0, tamper.stderr
+    assert "attempt_index" in tamper.stdout
+
+    after = run(sys.executable, "-m", "pramaan", "--db", db, "recheck", "--all")
+    assert after.returncode == 1, "replay did not fail after tampering"
+    assert "snapshot hash mismatch" in after.stdout
+    assert "disposition mismatch" in after.stdout
+
+
+def test_tamper_script_refuses_without_a_prepared_database(tmp_path):
+    from pramaan.storage import db as storage
+    path = tmp_path / "empty.db"
+    storage.connect(path).close()
+    r = run(sys.executable, "scripts/tamper_demo.py", str(path))
+    assert r.returncode == 2 and "no suitable snapshot" in r.stdout
+
+
+@pytest.mark.parametrize("selection,expect_passed", [
+    ("touches_neither or calls_provider_then_propose", 3),
+    ("crafted or absent_record", 3),
+])
+def test_runbook_test_selections_pass(selection, expect_passed):
+    """C4 and C5 quote exact pass counts; verify them."""
+    target = ("tests/test_gate.py" if "touches" in selection
+              else "tests/test_rules.py")
+    r = run(sys.executable, "-m", "pytest", target, "-k", selection,
+            "-q", "--no-header")
+    assert r.returncode == 0, r.stdout
+    assert f"{expect_passed} passed" in r.stdout, r.stdout
+
+
+def test_runbook_storage_selection_count_is_accurate():
+    r = run(sys.executable, "-m", "pytest", "tests/test_storage.py", "-k",
+            "append_only or raw_sql_cannot", "-q", "--no-header")
+    assert r.returncode == 0
+    claimed = re.search(r"^13 passed$", RUNBOOK, re.MULTILINE)
+    actual = re.search(r"(\d+) passed", r.stdout).group(1)
+    assert claimed, "runbook does not state a count for C6"
+    assert actual == "13", f"runbook claims 13, actual {actual}"
+
+
+def test_script_says_the_proposer_is_a_mock():
+    """The one dishonest move available; guard against it."""
+    assert "model=MOCK" in SCRIPT
+    assert "deterministic fixture, not Claude" in SCRIPT
+    assert "deterministic mock" in SCRIPT.lower()
+
+
+def _prose_lines(doc: str) -> list[str]:
+    """Lines that are actually assertions, excluding the claim-guard section.
+
+    That section's entire purpose is to ENUMERATE forbidden phrases in a
+    "DO NOT SAY" column, so scanning it for those phrases flags the guard
+    itself. Excluded by section heading, not by guessing at table syntax.
+    """
+    out, in_guard = [], False
+    for raw in doc.splitlines():
+        if raw.startswith("#"):
+            in_guard = "claim guard" in raw.lower()
+        if not in_guard:
+            out.append(raw)
+    return out
+
+
+def test_the_claim_guard_actually_lists_forbidden_phrases():
+    """The exclusion above must not be able to hide an empty guard."""
+    guard = RUNBOOK[RUNBOOK.lower().index("## 4. claim guard"):]
+    for phrase in ("Tamper-proof", "Exactly-once", "Integrated with Razorpay"):
+        assert phrase in guard, f"claim guard omits {phrase!r}"
+    assert "DO NOT SAY" in guard
+
+
+def test_script_and_runbook_do_not_overclaim():
+    negations = ("not ", "never ", "no ", "does not", "cannot", "is not",
+                 "rather than")
+    for name, doc in (("VIDEO_SCRIPT", SCRIPT), ("DEMO_RUNBOOK", RUNBOOK)):
+        for overclaim in ("tamper-proof", "production-ready", "exactly-once",
+                          "live razorpay", "outperforms", "guaranteed",
+                          "npci compliant", "fraud prevention"):
+            for raw in _prose_lines(doc):
+                line = raw.lower()
+                if overclaim not in line:
+                    continue
+                before = line[:line.index(overclaim)]
+                assert any(n in before for n in negations), \
+                    f"{name} overclaims: {raw.strip()!r}"
+
+
+def test_script_evidence_map_cites_real_tests():
+    referenced = set(re.findall(r"::(test_\w+)", SCRIPT))
+    assert len(referenced) >= 15, f"only {len(referenced)} tests cited"
+    missing = referenced - _all_test_names()
+    assert not missing, f"script cites non-existent tests: {sorted(missing)}"
+
+
+def test_script_discloses_every_live_limitation():
+    lowered = SCRIPT.lower()
+    for disclosure in ("never made a live model call", "boundary skeleton",
+                       "no accuracy claim", "tamper *evidence*"):
+        assert disclosure in lowered or disclosure in SCRIPT, \
+            f"script omits disclosure: {disclosure!r}"
