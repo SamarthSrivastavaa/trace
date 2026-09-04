@@ -1,0 +1,26 @@
+{
+  "policy_id": "pramaan-default",
+  "label": "v1",
+  "rules": [
+    {
+      "type": "suppression",
+      "id": "opt_out",
+      "stage": "pre_state",
+      "enabled": true
+    },
+    {
+      "type": "cooldown",
+      "id": "min_gap_between_sends",
+      "stage": "pre_state",
+      "enabled": true,
+      "min_seconds_between_sends": 86400
+    },
+    {
+      "type": "attempt_limit",
+      "id": "npci_attempt_cap",
+      "stage": "post_state",
+      "enabled": true,
+      "max_attempts": 4
+    }
+  ]
+}

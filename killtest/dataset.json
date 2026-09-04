@@ -1,0 +1,1440 @@
+[
+  {
+    "case_id": "c_050a497ae4",
+    "claim_types": [
+      "subscription_consequence"
+    ],
+    "label": "CONTRADICTED",
+    "message": "This is our final attempt; your plan will be cancelled after this.",
+    "note": "",
+    "pair_id": "p_59d81fb1",
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "subscription": {
+        "attempt_index": 1,
+        "max_attempts": 4,
+        "next_action": "retry",
+        "status": "active"
+      }
+    },
+    "state_key": "sub_attempt_1_of_4"
+  },
+  {
+    "case_id": "c_05f745ec13",
+    "claim_types": [
+      "cart"
+    ],
+    "label": "CONTRADICTED",
+    "message": "You left 2 items behind.",
+    "note": "",
+    "pair_id": "p_a64dc247",
+    "split": "heldout",
+    "state": {
+      "cart": {
+        "currency": "INR",
+        "item_count": 5,
+        "total": 499900
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "cart_5items_4999"
+  },
+  {
+    "case_id": "c_069001adbe",
+    "claim_types": [
+      "discount"
+    ],
+    "label": "SUPPORTED",
+    "message": "Here's Rs 500 off your next order.",
+    "note": "",
+    "pair_id": "p_90c520b9",
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "currency": "INR",
+          "flat_amount": 500,
+          "offer_id": "ofr_A4",
+          "valid_until": "2026-09-20T23:59:59+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_flat_500"
+  },
+  {
+    "case_id": "c_075fb9ef6f",
+    "claim_types": [
+      "cart"
+    ],
+    "label": "UNVERIFIABLE",
+    "message": "We've held your items for you.",
+    "note": "no hold/reservation state",
+    "pair_id": null,
+    "split": "dev",
+    "state": {
+      "cart": {
+        "currency": "INR",
+        "item_count": 2,
+        "total": 499900
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "cart_2items_4999"
+  },
+  {
+    "case_id": "c_08ad688250",
+    "claim_types": [
+      "price"
+    ],
+    "label": "UNVERIFIABLE",
+    "message": "This price is the lowest it has ever been.",
+    "note": "no price history in state",
+    "pair_id": null,
+    "split": "dev",
+    "state": {
+      "cart": {
+        "currency": "INR",
+        "item_count": 2,
+        "total": 499900
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "cart_2items_4999"
+  },
+  {
+    "case_id": "c_09d63c08e3",
+    "claim_types": [
+      "discount"
+    ],
+    "label": "CONTRADICTED",
+    "message": "There is no discount on your cart at the moment.",
+    "note": "",
+    "pair_id": null,
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "offer_id": "ofr_A1",
+          "percent": 15,
+          "valid_until": "2026-09-14T23:59:59+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_15_live"
+  },
+  {
+    "case_id": "c_10feb68aac",
+    "claim_types": [
+      "eligibility"
+    ],
+    "label": "SUPPORTED",
+    "message": "Your gold-tier benefits are active.",
+    "note": "",
+    "pair_id": null,
+    "split": "heldout",
+    "state": {
+      "customer": {
+        "opted_out": false,
+        "tier": "gold"
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "cust_active_gold"
+  },
+  {
+    "case_id": "c_184ec301df",
+    "claim_types": [
+      "discount",
+      "deadline"
+    ],
+    "label": "CONTRADICTED",
+    "message": "Take 15% off, but it ends tonight.",
+    "note": "",
+    "pair_id": "p_d5924daa",
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "offer_id": "ofr_A2",
+          "percent": 40,
+          "valid_until": "2026-09-05T06:00:00+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_40_live"
+  },
+  {
+    "case_id": "c_1f6c3996bf",
+    "claim_types": [
+      "scarcity"
+    ],
+    "label": "CONTRADICTED",
+    "message": "Stock is running low on this one.",
+    "note": "",
+    "pair_id": "p_8fcaaae0",
+    "split": "dev",
+    "state": {
+      "inventory": {
+        "sku_88": 240
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "inv_240"
+  },
+  {
+    "case_id": "c_208d916f7a",
+    "claim_types": [
+      "discount"
+    ],
+    "label": "CONTRADICTED",
+    "message": "Your 15% discount is still available.",
+    "note": "",
+    "pair_id": "p_01caa70f",
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": []
+    },
+    "state_key": "offer_none"
+  },
+  {
+    "case_id": "c_219fb57dd9",
+    "claim_types": [
+      "discount"
+    ],
+    "label": "CONTRADICTED",
+    "message": "Grab a flat 15% off before you check out.",
+    "note": "",
+    "pair_id": "p_7774adaa",
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "offer_id": "ofr_A2",
+          "percent": 40,
+          "valid_until": "2026-09-05T06:00:00+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_40_live"
+  },
+  {
+    "case_id": "c_28b8f8f0e9",
+    "claim_types": [
+      "subscription_consequence"
+    ],
+    "label": "SUPPORTED",
+    "message": "This is our final attempt; your plan will be cancelled after this.",
+    "note": "",
+    "pair_id": "p_59d81fb1",
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "subscription": {
+        "attempt_index": 4,
+        "max_attempts": 4,
+        "next_action": "cancel",
+        "status": "active"
+      }
+    },
+    "state_key": "sub_attempt_4_of_4"
+  },
+  {
+    "case_id": "c_2bc8d0a3f5",
+    "claim_types": [
+      "scarcity"
+    ],
+    "label": "SUPPORTED",
+    "message": "You have 240 units available if you want to bulk order.",
+    "note": "",
+    "pair_id": null,
+    "split": "heldout",
+    "state": {
+      "inventory": {
+        "sku_88": 240
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "inv_240"
+  },
+  {
+    "case_id": "c_2ee54484d5",
+    "claim_types": [
+      "eligibility"
+    ],
+    "label": "CONTRADICTED",
+    "message": "Exclusive to our Gold tier customers.",
+    "note": "",
+    "pair_id": "p_22f11f0b",
+    "split": "dev",
+    "state": {
+      "customer": {
+        "opted_out": false,
+        "tier": "standard"
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "cust_active_std"
+  },
+  {
+    "case_id": "c_2f845313c1",
+    "claim_types": [
+      "eligibility"
+    ],
+    "label": "UNVERIFIABLE",
+    "message": "As a Gold member you get early access.",
+    "note": "",
+    "pair_id": "p_ad177c4a",
+    "split": "heldout",
+    "state": {
+      "customer": {
+        "opted_out": false
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "cust_tier_absent"
+  },
+  {
+    "case_id": "c_36c4de0f92",
+    "claim_types": [
+      "discount",
+      "deadline"
+    ],
+    "label": "CONTRADICTED",
+    "message": "Rs 500 off, valid until 20 September.",
+    "note": "",
+    "pair_id": null,
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "currency": "INR",
+          "flat_amount": 150,
+          "offer_id": "ofr_A5",
+          "valid_until": "2026-09-20T23:59:59+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_flat_150"
+  },
+  {
+    "case_id": "c_371ca0d63b",
+    "claim_types": [
+      "cart"
+    ],
+    "label": "SUPPORTED",
+    "message": "A quick reminder about the items in your basket.",
+    "note": "vague, no falsifiable quantity",
+    "pair_id": null,
+    "split": "dev",
+    "state": {
+      "cart": {
+        "currency": "INR",
+        "item_count": 5,
+        "total": 499900
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "cart_5items_4999"
+  },
+  {
+    "case_id": "c_3be2c93e9a",
+    "claim_types": [
+      "subscription_consequence"
+    ],
+    "label": "SUPPORTED",
+    "message": "Your subscription payment failed four times.",
+    "note": "",
+    "pair_id": null,
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "subscription": {
+        "attempt_index": 4,
+        "max_attempts": 4,
+        "next_action": "cancel",
+        "status": "active"
+      }
+    },
+    "state_key": "sub_attempt_4_of_4"
+  },
+  {
+    "case_id": "c_3d872b75e6",
+    "claim_types": [
+      "subscription_consequence"
+    ],
+    "label": "CONTRADICTED",
+    "message": "Your subscription is still active - renew now to keep it.",
+    "note": "",
+    "pair_id": "p_65b90f2c",
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "subscription": {
+        "attempt_index": 4,
+        "max_attempts": 4,
+        "next_action": "none",
+        "status": "cancelled"
+      }
+    },
+    "state_key": "sub_cancelled"
+  },
+  {
+    "case_id": "c_422f6ad74d",
+    "claim_types": [
+      "discount",
+      "deadline"
+    ],
+    "label": "SUPPORTED",
+    "message": "Rs 500 off, valid until 20 September.",
+    "note": "",
+    "pair_id": null,
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "currency": "INR",
+          "flat_amount": 500,
+          "offer_id": "ofr_A4",
+          "valid_until": "2026-09-20T23:59:59+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_flat_500"
+  },
+  {
+    "case_id": "c_430645ca95",
+    "claim_types": [
+      "scarcity"
+    ],
+    "label": "CONTRADICTED",
+    "message": "Almost gone - just a couple of units remaining.",
+    "note": "",
+    "pair_id": "p_ccb9b83d",
+    "split": "heldout",
+    "state": {
+      "inventory": {
+        "sku_88": 240
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "inv_240"
+  },
+  {
+    "case_id": "c_493bc636ac",
+    "claim_types": [
+      "discount"
+    ],
+    "label": "SUPPORTED",
+    "message": "There is no discount on your cart at the moment.",
+    "note": "",
+    "pair_id": null,
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": []
+    },
+    "state_key": "offer_none"
+  },
+  {
+    "case_id": "c_4ffdd03b9f",
+    "claim_types": [
+      "subscription_consequence"
+    ],
+    "label": "CONTRADICTED",
+    "message": "Your subscription payment failed four times.",
+    "note": "",
+    "pair_id": null,
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "subscription": {
+        "attempt_index": 1,
+        "max_attempts": 4,
+        "next_action": "retry",
+        "status": "active"
+      }
+    },
+    "state_key": "sub_attempt_1_of_4"
+  },
+  {
+    "case_id": "c_5075c625c3",
+    "claim_types": [
+      "delivery"
+    ],
+    "label": "UNVERIFIABLE",
+    "message": "Thanks for shopping with us - your order is on its way.",
+    "note": "no shipment state present",
+    "pair_id": null,
+    "split": "dev",
+    "state": {
+      "cart": {
+        "currency": "INR",
+        "item_count": 2,
+        "total": 499900
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "cart_2items_4999"
+  },
+  {
+    "case_id": "c_52d5c20e37",
+    "claim_types": [
+      "eligibility"
+    ],
+    "label": "CONTRADICTED",
+    "message": "Here's an update on your order.",
+    "note": "",
+    "pair_id": "p_450212bb",
+    "split": "heldout",
+    "state": {
+      "customer": {
+        "opted_out": true,
+        "tier": "standard"
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "cust_optedout"
+  },
+  {
+    "case_id": "c_55fa2fc2d1",
+    "claim_types": [
+      "payment_status"
+    ],
+    "label": "UNVERIFIABLE",
+    "message": "Your last transaction went through successfully.",
+    "note": "",
+    "pair_id": "p_d3795da4",
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "pay_absent"
+  },
+  {
+    "case_id": "c_56bb8b9a8a",
+    "claim_types": [
+      "discount",
+      "deadline"
+    ],
+    "label": "SUPPORTED",
+    "message": "Your discount code is live right now.",
+    "note": "",
+    "pair_id": "p_4b4be27e",
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "offer_id": "ofr_A1",
+          "percent": 15,
+          "valid_until": "2026-09-14T23:59:59+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_15_live"
+  },
+  {
+    "case_id": "c_5e97a6538a",
+    "claim_types": [
+      "payment_status"
+    ],
+    "label": "SUPPORTED",
+    "message": "Your last transaction went through successfully.",
+    "note": "",
+    "pair_id": "p_d3795da4",
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "payment": {
+        "amount": 249900,
+        "currency": "INR",
+        "payment_id": "pay_9y",
+        "status": "captured"
+      }
+    },
+    "state_key": "pay_captured"
+  },
+  {
+    "case_id": "c_60df052919",
+    "claim_types": [
+      "scarcity"
+    ],
+    "label": "UNVERIFIABLE",
+    "message": "Hurry, only 2 left in stock.",
+    "note": "",
+    "pair_id": "p_2a6a597f",
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "inv_absent"
+  },
+  {
+    "case_id": "c_628a5ed79a",
+    "claim_types": [
+      "payment_status"
+    ],
+    "label": "UNVERIFIABLE",
+    "message": "Your card ending 4242 was declined.",
+    "note": "status matches but card last4 not in state",
+    "pair_id": null,
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "payment": {
+        "amount": 249900,
+        "currency": "INR",
+        "payment_id": "pay_9x",
+        "status": "failed"
+      }
+    },
+    "state_key": "pay_failed"
+  },
+  {
+    "case_id": "c_65e0c8e51e",
+    "claim_types": [
+      "payment_status",
+      "price"
+    ],
+    "label": "CONTRADICTED",
+    "message": "Payment of Rs 2,499 could not be collected.",
+    "note": "",
+    "pair_id": null,
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "payment": {
+        "amount": 249900,
+        "currency": "INR",
+        "payment_id": "pay_9y",
+        "status": "captured"
+      }
+    },
+    "state_key": "pay_captured"
+  },
+  {
+    "case_id": "c_699df9ea9a",
+    "claim_types": [
+      "deadline"
+    ],
+    "label": "SUPPORTED",
+    "message": "Your offer has already expired.",
+    "note": "",
+    "pair_id": null,
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": false,
+          "offer_id": "ofr_A3",
+          "percent": 15,
+          "valid_until": "2026-09-01T23:59:59+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_15_expired"
+  },
+  {
+    "case_id": "c_69d7b1fa9f",
+    "claim_types": [
+      "scarcity"
+    ],
+    "label": "UNVERIFIABLE",
+    "message": "You're one of only 2 people with this in their cart.",
+    "note": "inventory 2 != carts 2; different quantity",
+    "pair_id": null,
+    "split": "dev",
+    "state": {
+      "inventory": {
+        "sku_88": 2
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "inv_2"
+  },
+  {
+    "case_id": "c_6bb41bced7",
+    "claim_types": [
+      "price"
+    ],
+    "label": "UNVERIFIABLE",
+    "message": "Your basket comes to Rs 4,999.",
+    "note": "",
+    "pair_id": "p_0b9ea252",
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "pay_absent"
+  },
+  {
+    "case_id": "c_719c31da86",
+    "claim_types": [
+      "subscription_consequence"
+    ],
+    "label": "SUPPORTED",
+    "message": "We'll try charging your card once more tomorrow.",
+    "note": "",
+    "pair_id": "p_5b99640d",
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "subscription": {
+        "attempt_index": 1,
+        "max_attempts": 4,
+        "next_action": "retry",
+        "status": "active"
+      }
+    },
+    "state_key": "sub_attempt_1_of_4"
+  },
+  {
+    "case_id": "c_73e44f22a0",
+    "claim_types": [
+      "discount"
+    ],
+    "label": "CONTRADICTED",
+    "message": "Complete checkout to secure your 15% saving.",
+    "note": "",
+    "pair_id": null,
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": []
+    },
+    "state_key": "offer_none"
+  },
+  {
+    "case_id": "c_75851229a4",
+    "claim_types": [
+      "payment_status",
+      "price"
+    ],
+    "label": "SUPPORTED",
+    "message": "Payment of Rs 2,499 could not be collected.",
+    "note": "",
+    "pair_id": null,
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "payment": {
+        "amount": 249900,
+        "currency": "INR",
+        "payment_id": "pay_9x",
+        "status": "failed"
+      }
+    },
+    "state_key": "pay_failed"
+  },
+  {
+    "case_id": "c_75c13dbcd2",
+    "claim_types": [
+      "deadline"
+    ],
+    "label": "SUPPORTED",
+    "message": "Only a few hours left to use this.",
+    "note": "",
+    "pair_id": "p_4857b7ca",
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "offer_id": "ofr_A2",
+          "percent": 40,
+          "valid_until": "2026-09-05T06:00:00+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_40_live"
+  },
+  {
+    "case_id": "c_7775f98d7c",
+    "claim_types": [
+      "scarcity"
+    ],
+    "label": "SUPPORTED",
+    "message": "Almost gone - just a couple of units remaining.",
+    "note": "",
+    "pair_id": "p_ccb9b83d",
+    "split": "heldout",
+    "state": {
+      "inventory": {
+        "sku_88": 2
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "inv_2"
+  },
+  {
+    "case_id": "c_7d47f6f82b",
+    "claim_types": [
+      "deadline"
+    ],
+    "label": "SUPPORTED",
+    "message": "Your offer expires in 24 hours.",
+    "note": "",
+    "pair_id": "p_6ef9c53a",
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "offer_id": "ofr_A2",
+          "percent": 40,
+          "valid_until": "2026-09-05T06:00:00+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_40_live"
+  },
+  {
+    "case_id": "c_826d07d7da",
+    "claim_types": [
+      "discount",
+      "deadline"
+    ],
+    "label": "SUPPORTED",
+    "message": "Take 15% off, but it ends tonight.",
+    "note": "",
+    "pair_id": "p_d5924daa",
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "offer_id": "ofr_A6",
+          "percent": 15,
+          "valid_until": "2026-09-04T23:59:59+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_15_tonight"
+  },
+  {
+    "case_id": "c_8824a93761",
+    "claim_types": [
+      "eligibility"
+    ],
+    "label": "SUPPORTED",
+    "message": "Reply STOP to unsubscribe at any time.",
+    "note": "no factual claim about state",
+    "pair_id": null,
+    "split": "dev",
+    "state": {
+      "customer": {
+        "opted_out": false,
+        "tier": "standard"
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "cust_active_std"
+  },
+  {
+    "case_id": "c_8d38d8c426",
+    "claim_types": [
+      "subscription_consequence"
+    ],
+    "label": "SUPPORTED",
+    "message": "Your subscription is still active - renew now to keep it.",
+    "note": "",
+    "pair_id": "p_65b90f2c",
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "subscription": {
+        "attempt_index": 1,
+        "max_attempts": 4,
+        "next_action": "retry",
+        "status": "active"
+      }
+    },
+    "state_key": "sub_attempt_1_of_4"
+  },
+  {
+    "case_id": "c_8f5a1c2bdd",
+    "claim_types": [
+      "payment_status"
+    ],
+    "label": "SUPPORTED",
+    "message": "We couldn't process your payment.",
+    "note": "",
+    "pair_id": "p_4f424a3a",
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "payment": {
+        "amount": 249900,
+        "currency": "INR",
+        "payment_id": "pay_9x",
+        "status": "failed"
+      }
+    },
+    "state_key": "pay_failed"
+  },
+  {
+    "case_id": "c_90206c0b78",
+    "claim_types": [
+      "price"
+    ],
+    "label": "SUPPORTED",
+    "message": "Your basket comes to Rs 4,999.",
+    "note": "",
+    "pair_id": "p_0b9ea252",
+    "split": "heldout",
+    "state": {
+      "cart": {
+        "currency": "INR",
+        "item_count": 2,
+        "total": 499900
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "cart_2items_4999"
+  },
+  {
+    "case_id": "c_978016034c",
+    "claim_types": [
+      "eligibility"
+    ],
+    "label": "UNVERIFIABLE",
+    "message": "You qualify for free delivery on this order.",
+    "note": "no shipping rules in state",
+    "pair_id": null,
+    "split": "dev",
+    "state": {
+      "cart": {
+        "currency": "INR",
+        "item_count": 2,
+        "total": 499900
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "cart_2items_4999"
+  },
+  {
+    "case_id": "c_9beb1f75aa",
+    "claim_types": [
+      "payment_status"
+    ],
+    "label": "CONTRADICTED",
+    "message": "We couldn't process your payment.",
+    "note": "",
+    "pair_id": "p_4f424a3a",
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "payment": {
+        "amount": 249900,
+        "currency": "INR",
+        "payment_id": "pay_9y",
+        "status": "captured"
+      }
+    },
+    "state_key": "pay_captured"
+  },
+  {
+    "case_id": "c_9c9cc79ba5",
+    "claim_types": [
+      "deadline"
+    ],
+    "label": "SUPPORTED",
+    "message": "Last chance - this deal closes today.",
+    "note": "",
+    "pair_id": "p_ccec8ac0",
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "offer_id": "ofr_A2",
+          "percent": 40,
+          "valid_until": "2026-09-05T06:00:00+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_40_live"
+  },
+  {
+    "case_id": "c_a3d2ced898",
+    "claim_types": [
+      "scarcity"
+    ],
+    "label": "UNVERIFIABLE",
+    "message": "Everyone in your city is buying this right now.",
+    "note": "no geographic demand data",
+    "pair_id": null,
+    "split": "heldout",
+    "state": {
+      "inventory": {
+        "sku_88": 240
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "inv_240"
+  },
+  {
+    "case_id": "c_a5c958eb6d",
+    "claim_types": [
+      "scarcity"
+    ],
+    "label": "SUPPORTED",
+    "message": "Stock is running low on this one.",
+    "note": "",
+    "pair_id": "p_8fcaaae0",
+    "split": "dev",
+    "state": {
+      "inventory": {
+        "sku_88": 2
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "inv_2"
+  },
+  {
+    "case_id": "c_af2c5cb640",
+    "claim_types": [
+      "deadline"
+    ],
+    "label": "CONTRADICTED",
+    "message": "Your offer expires in 24 hours.",
+    "note": "",
+    "pair_id": "p_6ef9c53a",
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": false,
+          "offer_id": "ofr_A3",
+          "percent": 15,
+          "valid_until": "2026-09-01T23:59:59+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_15_expired"
+  },
+  {
+    "case_id": "c_ba1b598968",
+    "claim_types": [
+      "subscription_consequence"
+    ],
+    "label": "SUPPORTED",
+    "message": "Your plan renews automatically unless cancelled.",
+    "note": "",
+    "pair_id": null,
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "subscription": {
+        "attempt_index": 1,
+        "max_attempts": 4,
+        "next_action": "retry",
+        "status": "active"
+      }
+    },
+    "state_key": "sub_attempt_1_of_4"
+  },
+  {
+    "case_id": "c_bfc7b70809",
+    "claim_types": [
+      "discount"
+    ],
+    "label": "SUPPORTED",
+    "message": "Complete checkout to secure your 15% saving.",
+    "note": "",
+    "pair_id": null,
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "offer_id": "ofr_A1",
+          "percent": 15,
+          "valid_until": "2026-09-14T23:59:59+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_15_live"
+  },
+  {
+    "case_id": "c_c090c67e8f",
+    "claim_types": [
+      "scarcity"
+    ],
+    "label": "SUPPORTED",
+    "message": "Hurry, only 2 left in stock.",
+    "note": "",
+    "pair_id": "p_2a6a597f",
+    "split": "dev",
+    "state": {
+      "inventory": {
+        "sku_88": 2
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "inv_2"
+  },
+  {
+    "case_id": "c_c5891886f1",
+    "claim_types": [
+      "cart"
+    ],
+    "label": "SUPPORTED",
+    "message": "You left 2 items behind.",
+    "note": "",
+    "pair_id": "p_a64dc247",
+    "split": "heldout",
+    "state": {
+      "cart": {
+        "currency": "INR",
+        "item_count": 2,
+        "total": 499900
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "cart_2items_4999"
+  },
+  {
+    "case_id": "c_c7ff6f1e59",
+    "claim_types": [
+      "eligibility"
+    ],
+    "label": "SUPPORTED",
+    "message": "As a Gold member you get early access.",
+    "note": "",
+    "pair_id": "p_ad177c4a",
+    "split": "heldout",
+    "state": {
+      "customer": {
+        "opted_out": false,
+        "tier": "gold"
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "cust_active_gold"
+  },
+  {
+    "case_id": "c_ca4acaf0fb",
+    "claim_types": [
+      "deadline"
+    ],
+    "label": "CONTRADICTED",
+    "message": "Only a few hours left to use this.",
+    "note": "",
+    "pair_id": "p_4857b7ca",
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "offer_id": "ofr_A1",
+          "percent": 15,
+          "valid_until": "2026-09-14T23:59:59+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_15_live"
+  },
+  {
+    "case_id": "c_d297665643",
+    "claim_types": [
+      "discount"
+    ],
+    "label": "UNVERIFIABLE",
+    "message": "You've got 500 off waiting for you.",
+    "note": "",
+    "pair_id": "p_a87e2add",
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "offer_id": "ofr_A1",
+          "percent": 15,
+          "valid_until": "2026-09-14T23:59:59+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_15_live"
+  },
+  {
+    "case_id": "c_d6395f3eb6",
+    "claim_types": [
+      "discount"
+    ],
+    "label": "CONTRADICTED",
+    "message": "Here's Rs 500 off your next order.",
+    "note": "",
+    "pair_id": "p_90c520b9",
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "currency": "INR",
+          "flat_amount": 150,
+          "offer_id": "ofr_A5",
+          "valid_until": "2026-09-20T23:59:59+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_flat_150"
+  },
+  {
+    "case_id": "c_d92d1f5402",
+    "claim_types": [
+      "discount"
+    ],
+    "label": "UNVERIFIABLE",
+    "message": "Your 15% discount is still available.",
+    "note": "",
+    "pair_id": "p_01caa70f",
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "offer_absent_field"
+  },
+  {
+    "case_id": "c_d96be727ed",
+    "claim_types": [
+      "deadline"
+    ],
+    "label": "CONTRADICTED",
+    "message": "Last chance - this deal closes today.",
+    "note": "",
+    "pair_id": "p_ccec8ac0",
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "currency": "INR",
+          "flat_amount": 500,
+          "offer_id": "ofr_A4",
+          "valid_until": "2026-09-20T23:59:59+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_flat_500"
+  },
+  {
+    "case_id": "c_db14628e5e",
+    "claim_types": [
+      "eligibility"
+    ],
+    "label": "SUPPORTED",
+    "message": "Exclusive to our Gold tier customers.",
+    "note": "",
+    "pair_id": "p_22f11f0b",
+    "split": "dev",
+    "state": {
+      "customer": {
+        "opted_out": false,
+        "tier": "gold"
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "cust_active_gold"
+  },
+  {
+    "case_id": "c_e1e4f0056e",
+    "claim_types": [
+      "discount"
+    ],
+    "label": "SUPPORTED",
+    "message": "You've got 500 off waiting for you.",
+    "note": "",
+    "pair_id": "p_a87e2add",
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "currency": "INR",
+          "flat_amount": 500,
+          "offer_id": "ofr_A4",
+          "valid_until": "2026-09-20T23:59:59+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_flat_500"
+  },
+  {
+    "case_id": "c_e3b1482af3",
+    "claim_types": [
+      "deadline"
+    ],
+    "label": "CONTRADICTED",
+    "message": "Your offer has already expired.",
+    "note": "",
+    "pair_id": null,
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "offer_id": "ofr_A1",
+          "percent": 15,
+          "valid_until": "2026-09-14T23:59:59+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_15_live"
+  },
+  {
+    "case_id": "c_e55e543343",
+    "claim_types": [
+      "subscription_consequence"
+    ],
+    "label": "CONTRADICTED",
+    "message": "We'll try charging your card once more tomorrow.",
+    "note": "",
+    "pair_id": "p_5b99640d",
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "subscription": {
+        "attempt_index": 4,
+        "max_attempts": 4,
+        "next_action": "cancel",
+        "status": "active"
+      }
+    },
+    "state_key": "sub_attempt_4_of_4"
+  },
+  {
+    "case_id": "c_e90d34c571",
+    "claim_types": [
+      "discount"
+    ],
+    "label": "SUPPORTED",
+    "message": "Grab a flat 15% off before you check out.",
+    "note": "",
+    "pair_id": "p_7774adaa",
+    "split": "dev",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": true,
+          "offer_id": "ofr_A1",
+          "percent": 15,
+          "valid_until": "2026-09-14T23:59:59+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_15_live"
+  },
+  {
+    "case_id": "c_ef123d086a",
+    "claim_types": [
+      "discount",
+      "deadline"
+    ],
+    "label": "CONTRADICTED",
+    "message": "Your discount code is live right now.",
+    "note": "",
+    "pair_id": "p_4b4be27e",
+    "split": "heldout",
+    "state": {
+      "now": "2026-09-04T10:00:00+05:30",
+      "offers": [
+        {
+          "active": false,
+          "offer_id": "ofr_A3",
+          "percent": 15,
+          "valid_until": "2026-09-01T23:59:59+05:30"
+        }
+      ]
+    },
+    "state_key": "offer_15_expired"
+  },
+  {
+    "case_id": "c_f1f12151b2",
+    "claim_types": [
+      "eligibility"
+    ],
+    "label": "SUPPORTED",
+    "message": "Here's an update on your order.",
+    "note": "",
+    "pair_id": "p_450212bb",
+    "split": "heldout",
+    "state": {
+      "customer": {
+        "opted_out": false,
+        "tier": "standard"
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "cust_active_std"
+  },
+  {
+    "case_id": "c_fcdb1123f6",
+    "claim_types": [
+      "price"
+    ],
+    "label": "UNVERIFIABLE",
+    "message": "Buy now before the price goes up next week.",
+    "note": "future pricing not in state",
+    "pair_id": null,
+    "split": "dev",
+    "state": {
+      "cart": {
+        "currency": "INR",
+        "item_count": 2,
+        "total": 499900
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "cart_2items_4999"
+  },
+  {
+    "case_id": "c_ff1f63e50c",
+    "claim_types": [
+      "cart"
+    ],
+    "label": "UNVERIFIABLE",
+    "message": "We noticed you were looking at this item.",
+    "note": "browsing history not in state",
+    "pair_id": null,
+    "split": "heldout",
+    "state": {
+      "cart": {
+        "currency": "INR",
+        "item_count": 2,
+        "total": 499900
+      },
+      "now": "2026-09-04T10:00:00+05:30"
+    },
+    "state_key": "cart_2items_4999"
+  }
+]
