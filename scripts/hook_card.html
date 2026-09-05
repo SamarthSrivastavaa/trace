@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Attest — hook card (0:00–0:13)</title>
+<style>
+  /* Timing, locked to the script:
+       0.4s  line 1 (white)  fades in
+       5.0s  line 2 (amber)  fades in
+      10.0s  line 3 (grey)   fades in
+      13.0s  hold — stop the recording here
+     Press R to replay from black. */
+  :root{
+    --serif:"Iowan Old Style",Charter,Georgia,Cambria,"Times New Roman",serif;
+    --sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    --amber:#E0913C;      /* the UI accent #B0561F, lifted for a black ground */
+    --grey:#8C887E;       /* --mut-d from the UI */
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:#000;cursor:none;overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+    display:flex;align-items:center;justify-content:center;
+  }
+  /* barely-there vignette so the black has depth on a projector */
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;
+    background:radial-gradient(ellipse at 50% 46%,rgba(255,255,255,.030),transparent 62%);
+  }
+  .stage{width:74vw;text-align:center;position:relative;z-index:1}
+
+  .l{opacity:0;animation-fill-mode:forwards;animation-timing-function:cubic-bezier(.22,.61,.36,1)}
+
+  .l1{
+    font:400 3.34vw/1.30 var(--serif);color:#FFFFFF;letter-spacing:-.018em;
+    animation:in 1.5s .40s forwards;
+  }
+  .l2{
+    margin-top:5.2vh;
+    font:400 2.30vw/1.3 var(--serif);color:var(--amber);letter-spacing:-.012em;
+    animation:in 1.3s 5.00s forwards;
+  }
+  .l3{
+    margin-top:3.4vh;
+    font:400 1.28vw/1.5 var(--sans);color:var(--grey);letter-spacing:.012em;
+    animation:in 1.3s 10.00s forwards;
+  }
+  @keyframes in{
+    from{opacity:0;transform:translateY(.55vh);filter:blur(2px)}
+    to  {opacity:1;transform:none;filter:blur(0)}
+  }
+  @media (prefers-reduced-motion:reduce){.l{animation-duration:.01s}}
+</style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <p class="l l1">This is our final attempt. Your 15% offer expires in 24&nbsp;hours.</p>
+    <p class="l l2">Is this true?</p>
+    <p class="l l3">You cannot answer that from the sentence.</p>
+  </div>
+<script>
+  addEventListener('keydown', function(e){
+    if (e.key === 'r' || e.key === 'R' || e.key === ' ') {
+      var s = document.getElementById('stage');
+      var c = s.cloneNode(true);
+      s.parentNode.replaceChild(c, s);
+      c.id = 'stage';
+    }
+  });
+</script>
+</body>
+</html>
