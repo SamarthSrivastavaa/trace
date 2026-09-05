@@ -1,4 +1,4 @@
-# Core (required). The full 323-test suite runs on these alone, offline.
+# Core (required). The full 422-test suite runs on these alone, offline.
 pydantic>=2.0
 pytest>=8.0
 
