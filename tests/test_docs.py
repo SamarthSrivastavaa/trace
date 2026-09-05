@@ -24,8 +24,8 @@ def run(*args, timeout=180):
     import os
     env = {k: v for k, v in os.environ.items()
            if k not in ("ANTHROPIC_API_KEY", "RAZORPAY_KEY_ID",
-                        "RAZORPAY_KEY_SECRET", "PRAMAAN_DB",
-                        "PRAMAAN_PROPOSER", "PRAMAAN_STATE_PROVIDER")}
+                        "RAZORPAY_KEY_SECRET", "ATTEST_DB",
+                        "ATTEST_PROPOSER", "ATTEST_STATE_PROVIDER")}
     return subprocess.run(args, capture_output=True, text=True,
                           timeout=timeout, cwd=str(ROOT), env=env)
 
@@ -38,7 +38,7 @@ def test_required_files_exist():
 
 
 def test_readme_states_limits_before_features():
-    """'What Pramaan does NOT prove' must appear above the quickstart."""
+    """'What Attest does NOT prove' must appear above the quickstart."""
     not_proven = README.index("does NOT prove")
     quickstart = README.index("## Quickstart")
     assert not_proven < quickstart, "limitations are buried below the features"
@@ -55,7 +55,7 @@ def test_readme_answers_the_six_required_questions():
     for phrase in ("checks every factual claim",          # what is it
                    "cannot tell from the text",           # why it exists
                    "final_attempt  -> SEND",              # state-flip example
-                   "What Pramaan proves",                 # scoped guarantee
+                   "What Attest proves",                 # scoped guarantee
                    "does NOT prove",                      # limits
                    "recheck"):                            # independent check
         assert phrase in README, f"README does not answer: {phrase!r}"
@@ -86,7 +86,7 @@ def test_claimed_frozen_identifiers_are_real():
     assert digest.startswith("f3b65c56"), "dataset changed since the freeze"
     assert "f3b65c56" in README
 
-    from pramaan.llm.prompt import prompt_identity
+    from attest.llm.prompt import prompt_identity
     assert prompt_identity() == "proposer-v1+e9521f9d39fd97eb"
     assert "proposer-v1+e9521f9d39fd97eb" in README
 
@@ -127,13 +127,13 @@ def test_readme_test_table_sums_to_the_real_total():
 def test_readme_commands_run(tmp_path, cmd):
     db = str(tmp_path / "doc.db")
     if cmd[0] == "recheck":
-        run(sys.executable, "-m", "pramaan", "--db", db, "demo")
-    r = run(sys.executable, "-m", "pramaan", "--db", db, *cmd)
+        run(sys.executable, "-m", "attest", "--db", db, "demo")
+    r = run(sys.executable, "-m", "attest", "--db", db, *cmd)
     assert r.returncode == 0, f"{cmd} failed:\n{r.stdout}\n{r.stderr}"
 
 
 def test_readme_evaluate_example_runs(tmp_path):
-    r = run(sys.executable, "-m", "pramaan", "--db", str(tmp_path / "e.db"),
+    r = run(sys.executable, "-m", "attest", "--db", str(tmp_path / "e.db"),
             "evaluate", "--draft",
             "This is our final attempt. Your 15% offer expires in 24 hours.",
             "--customer", "alice", "--scenario", "final_attempt",
@@ -143,7 +143,7 @@ def test_readme_evaluate_example_runs(tmp_path):
 
 
 def test_readme_demo_output_matches_what_is_documented(tmp_path):
-    r = run(sys.executable, "-m", "pramaan", "--db", str(tmp_path / "d.db"), "demo")
+    r = run(sys.executable, "-m", "attest", "--db", str(tmp_path / "d.db"), "demo")
     for line in ("final_attempt  -> SEND", "first_attempt  -> BLOCK"):
         assert line in r.stdout, f"README shows {line!r}, demo does not print it"
         assert line in README
@@ -210,10 +210,10 @@ def test_readme_says_the_kill_test_has_not_been_run():
 def test_razorpay_unresolved_count_matches_the_code():
     """Every doc claimed "8 of 12" while the mapping held 9 TODOs. The error
     understated the limitation, so nothing complained. It is pinned now."""
-    from pramaan.integrations.razorpay.provider import REQUIRED_RESOURCE_MAPPING
+    from attest.integrations.razorpay.provider import REQUIRED_RESOURCE_MAPPING
     todo = [k for k, v in REQUIRED_RESOURCE_MAPPING.items() if v.startswith("TODO")]
     claim = f"{len(todo)} of {len(REQUIRED_RESOURCE_MAPPING)}"
-    from pramaan.web.server import LIMITATIONS
+    from attest.web.server import LIMITATIONS
     served = " ".join(LIMITATIONS["not_proven"])
     for name, doc in (("README", README), ("RUNBOOK", RUNBOOK),
                       ("SCRIPT", SCRIPT), ("LIMITATIONS", served)):
@@ -248,7 +248,7 @@ def test_full_demo_sequence_runs_offline(tmp_path):
     """C1 -> C2 -> C3: demo, clean replay, tamper, failing replay."""
     db = str(tmp_path / "runbook.db")
 
-    demo = run(sys.executable, "-m", "pramaan", "--db", db, "demo")
+    demo = run(sys.executable, "-m", "attest", "--db", db, "demo")
     assert demo.returncode == 0, demo.stderr
     for line in ("model=MOCK", "final_attempt  -> SEND",
                  "first_attempt  -> BLOCK", "-> ESCALATE",
@@ -256,7 +256,7 @@ def test_full_demo_sequence_runs_offline(tmp_path):
                  "COOLDOWN_NOT_ELAPSED"):
         assert line in demo.stdout, f"demo missing {line!r}"
 
-    clean = run(sys.executable, "-m", "pramaan", "--db", db, "recheck", "--all")
+    clean = run(sys.executable, "-m", "attest", "--db", db, "recheck", "--all")
     assert clean.returncode == 0, clean.stdout
     assert "re-verified (no model calls, no network)" in clean.stdout
 
@@ -264,14 +264,14 @@ def test_full_demo_sequence_runs_offline(tmp_path):
     assert tamper.returncode == 0, tamper.stderr
     assert "attempt_index" in tamper.stdout
 
-    after = run(sys.executable, "-m", "pramaan", "--db", db, "recheck", "--all")
+    after = run(sys.executable, "-m", "attest", "--db", db, "recheck", "--all")
     assert after.returncode == 1, "replay did not fail after tampering"
     assert "snapshot hash mismatch" in after.stdout
     assert "disposition mismatch" in after.stdout
 
 
 def test_tamper_script_refuses_without_a_prepared_database(tmp_path):
-    from pramaan.storage import db as storage
+    from attest.storage import db as storage
     path = tmp_path / "empty.db"
     storage.connect(path).close()
     r = run(sys.executable, "scripts/tamper_demo.py", str(path))

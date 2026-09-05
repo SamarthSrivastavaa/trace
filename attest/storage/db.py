@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS proof (
 
 CREATE INDEX IF NOT EXISTS proof_by_time ON proof(created_at DESC);
 
--- Local records the PRE-STATE gate reads. Deliberately Pramaan-side: they must
+-- Local records the PRE-STATE gate reads. Deliberately Attest-side: they must
 -- be readable without acquiring authoritative state, which is what makes
 -- "a gated request costs zero provider calls" enforceable.
 CREATE TABLE IF NOT EXISTS suppression (
@@ -70,8 +70,8 @@ CREATE TABLE IF NOT EXISTS suppression (
     PRIMARY KEY (merchant_id, customer_id)
 );
 
--- A send_log row means: Pramaan received a SUCCESSFUL-SEND COMMIT for this
--- approved proof. It does NOT mean a transport delivered anything - Pramaan
+-- A send_log row means: Attest received a SUCCESSFUL-SEND COMMIT for this
+-- approved proof. It does NOT mean a transport delivered anything - Attest
 -- never observes the transport. It is the fact that consumes cooldown.
 --
 -- proof_id is the PRIMARY KEY, which makes idempotency structural: one
@@ -210,7 +210,7 @@ def all_proof_ids(conn: sqlite3.Connection) -> list[str]:
 
 
 # --- gate inputs -----------------------------------------------------------
-# Read here, decided in pramaan.policy.gate. Database I/O never happens inside
+# Read here, decided in attest.policy.gate. Database I/O never happens inside
 # the pure decision function.
 
 def is_suppressed(conn: sqlite3.Connection, merchant_id: str,
@@ -264,7 +264,7 @@ def commit_send(conn: sqlite3.Connection, proof_id: str, merchant_id: str,
     event. Retrying the same commit is a no-op success; committing DIFFERENT
     facts under the same proof_id is a conflict and is rejected.
 
-    What this does NOT mean: that a transport delivered anything. Pramaan never
+    What this does NOT mean: that a transport delivered anything. Attest never
     observes the transport. It records that a caller reported success.
     """
     for label, value in (("proof_id", proof_id), ("merchant_id", merchant_id),

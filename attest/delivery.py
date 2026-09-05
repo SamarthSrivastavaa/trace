@@ -1,15 +1,15 @@
 """The delivery boundary.
 
-WHERE PRAMAAN'S RESPONSIBILITY ENDS
+WHERE ATTEST'S RESPONSIBILITY ENDS
 -----------------------------------
-Pramaan decides whether a message is supported by recorded state and policy.
+Attest decides whether a message is supported by recorded state and policy.
 It returns SEND, BLOCK or ESCALATE. That is the whole of its verification
 responsibility.
 
 SEND means: "given the recorded policy and the recorded snapshot, no
 deterministic reason to block or escalate was found."
 
-SEND does NOT mean the message was delivered. Pramaan never observes a
+SEND does NOT mean the message was delivered. Attest never observes a
 transport. Delivery is somebody else's job and somebody else's failure mode:
 the process can crash after evaluation, the transport can reject the message,
 the caller can abandon the result.
@@ -18,11 +18,11 @@ So a SEND proof does not write send_log. A caller that actually achieved
 delivery calls commit_successful_send(), and THAT writes the fact which
 consumes cooldown.
 
-    result = evaluate(...)                       # Pramaan
+    result = evaluate(...)                       # Attest
     if result.disposition is SEND:
-        outcome = deliver(...)                   # NOT Pramaan
+        outcome = deliver(...)                   # NOT Attest
         if outcome.success:
-            commit_successful_send(...)          # Pramaan records the fact
+            commit_successful_send(...)          # Attest records the fact
 
 No real transport exists in this repository. SimulatedSender below is a
 deterministic stand-in and is labelled SIMULATED wherever it is shown.

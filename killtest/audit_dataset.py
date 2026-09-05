@@ -1,7 +1,7 @@
 """
 Phase 4 fairness / degeneracy audit. Run BEFORE any arm is executed.
 
-Every check here is a way the experiment could be rigged in Pramaan's favour.
+Every check here is a way the experiment could be rigged in Attest's favour.
 A dataset that fails these makes all downstream numbers worthless.
 """
 

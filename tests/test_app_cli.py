@@ -19,12 +19,12 @@ import sys
 
 import pytest
 
-from pramaan.app import Outcome, Pramaan, build_proposer, build_state_provider
-from pramaan.config import (AppConfig, ConfigError, ProposerChoice,
+from attest.app import Outcome, Attest, build_proposer, build_state_provider
+from attest.config import (AppConfig, ConfigError, ProposerChoice,
                             StateProviderChoice)
-from pramaan.core.verify.schema import Disposition
-from pramaan.fixtures import scenarios as fx
-from pramaan.storage import db
+from attest.core.verify.schema import Disposition
+from attest.fixtures import scenarios as fx
+from attest.storage import db
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 T0 = "2026-09-04T10:00:00+00:00"
@@ -34,7 +34,7 @@ T1 = "2026-09-04T11:00:00+00:00"
 @pytest.fixture()
 def app(tmp_path):
     cfg = AppConfig(db_path=str(tmp_path / "app.db"))
-    a = Pramaan(cfg)
+    a = Attest(cfg)
     yield a
     a.close()
 
@@ -44,10 +44,10 @@ def cli(*args, cwd=ROOT, env_extra=None):
     import os
     env = {k: v for k, v in os.environ.items()
            if k not in ("ANTHROPIC_API_KEY", "RAZORPAY_KEY_ID",
-                        "RAZORPAY_KEY_SECRET", "PRAMAAN_PROPOSER",
-                        "PRAMAAN_STATE_PROVIDER", "PRAMAAN_DB")}
+                        "RAZORPAY_KEY_SECRET", "ATTEST_PROPOSER",
+                        "ATTEST_STATE_PROVIDER", "ATTEST_DB")}
     env.update(env_extra or {})
-    return subprocess.run([sys.executable, "-m", "pramaan", *args],
+    return subprocess.run([sys.executable, "-m", "attest", *args],
                           capture_output=True, text=True, timeout=120,
                           cwd=str(cwd), env=env)
 
@@ -74,7 +74,7 @@ def test_config_holds_no_secret_even_when_env_is_set(monkeypatch):
     """The whole point: there is nothing in this object to redact."""
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-SECRET123")
     monkeypatch.setenv("RAZORPAY_KEY_SECRET", "rzp-SECRET456")
-    monkeypatch.setenv("PRAMAAN_PROPOSER", "claude")
+    monkeypatch.setenv("ATTEST_PROPOSER", "claude")
     cfg = AppConfig.from_env()
     blob = repr(cfg) + json.dumps(cfg.__dict__, default=str)
     assert "SECRET123" not in blob and "SECRET456" not in blob
@@ -100,9 +100,9 @@ def test_missing_policy_file_is_rejected(tmp_path):
 
 
 def test_env_selects_components(monkeypatch):
-    monkeypatch.setenv("PRAMAAN_STATE_PROVIDER", "fixture")
-    monkeypatch.setenv("PRAMAAN_PROPOSER", "fixture")
-    monkeypatch.setenv("PRAMAAN_DB", "custom.db")
+    monkeypatch.setenv("ATTEST_STATE_PROVIDER", "fixture")
+    monkeypatch.setenv("ATTEST_PROPOSER", "fixture")
+    monkeypatch.setenv("ATTEST_DB", "custom.db")
     cfg = AppConfig.from_env()
     assert cfg.db_path == "custom.db" and cfg.is_fully_simulated
 
@@ -117,14 +117,14 @@ def test_fixture_components_need_no_credentials(monkeypatch):
 
 
 def test_live_proposer_construction_fails_typed_without_credentials(monkeypatch):
-    from pramaan.llm.errors import ProposerNotConfigured
+    from attest.llm.errors import ProposerNotConfigured
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     with pytest.raises(ProposerNotConfigured):
         build_proposer(AppConfig(proposer=ProposerChoice.CLAUDE))
 
 
 def test_live_state_provider_construction_fails_typed_without_credentials(monkeypatch):
-    from pramaan.state.errors import ProviderNotConfigured
+    from attest.state.errors import ProviderNotConfigured
     monkeypatch.delenv("RAZORPAY_KEY_ID", raising=False)
     monkeypatch.delenv("RAZORPAY_KEY_SECRET", raising=False)
     with pytest.raises(ProviderNotConfigured):
@@ -211,7 +211,7 @@ def _called_names(path: str) -> set[str]:
     return names
 
 
-@pytest.mark.parametrize("path", ["pramaan/app.py", "pramaan/cli.py"])
+@pytest.mark.parametrize("path", ["attest/app.py", "attest/cli.py"])
 def test_composition_layer_calls_no_verification_primitive(path):
     called = _called_names(path)
     for forbidden in ("adjudicate", "adjudicate_all", "find_spans",
@@ -221,14 +221,14 @@ def test_composition_layer_calls_no_verification_primitive(path):
         assert forbidden not in called, f"{path} calls {forbidden}()"
 
 
-@pytest.mark.parametrize("path", ["pramaan/app.py", "pramaan/cli.py"])
+@pytest.mark.parametrize("path", ["attest/app.py", "attest/cli.py"])
 def test_composition_layer_writes_no_sql(path):
     assert "INSERT INTO" not in _code(path)
     assert "UPDATE " not in _code(path)
 
 
 def test_cli_delegates_replay_rather_than_reimplementing_it():
-    code = _code("pramaan/cli.py")
+    code = _code("attest/cli.py")
     assert "recheck.main" in code
     for forbidden in ("recheck_one", "check_send_log"):
         assert forbidden not in code, f"cli.py reimplements {forbidden}"
@@ -236,7 +236,7 @@ def test_cli_delegates_replay_rather_than_reimplementing_it():
 
 def test_config_module_reads_no_secret():
     """It may read selector env vars, never a credential."""
-    src = (ROOT / "pramaan" / "config.py").read_text(encoding="utf-8")
+    src = (ROOT / "attest" / "config.py").read_text(encoding="utf-8")
     for secret in ("ANTHROPIC_API_KEY\")", "RAZORPAY_KEY_ID\")",
                    "RAZORPAY_KEY_SECRET\")"):
         assert f"environ.get({secret}" not in src, \

@@ -44,7 +44,7 @@ REQUIRED_RESOURCE_MAPPING = {
     "cart.item_count":             "TODO: Orders API - line items may require a separate fetch",
     "cart.total_minor":            "Orders API - amount (already minor units)",
     "customer.tier":               "TODO: not a Razorpay concept; merchant-supplied or unsupported",
-    "customer.opted_out":          "TODO: not a Razorpay concept; suppression is Pramaan-side state",
+    "customer.opted_out":          "TODO: not a Razorpay concept; suppression is Attest-side state",
 }
 
 

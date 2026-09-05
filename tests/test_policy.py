@@ -9,11 +9,11 @@ import json
 
 import pytest
 
-from pramaan.policy.loader import (DEFAULT_POLICY_PATH, InvalidPolicy,
+from attest.policy.loader import (DEFAULT_POLICY_PATH, InvalidPolicy,
                                    PolicyNotFound, canonical_policy,
                                    load_default_policy, load_policy,
                                    parse_policy, policy_hash, policy_identity)
-from pramaan.policy.schema import Stage
+from attest.policy.schema import Stage
 
 RAW = json.loads(DEFAULT_POLICY_PATH.read_text(encoding="utf-8"))
 

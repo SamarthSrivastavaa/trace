@@ -20,13 +20,13 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from pramaan.core.pipeline import evaluate                       # noqa: E402
-from pramaan.fixtures import scenarios as fx                     # noqa: E402
-from pramaan.llm.errors import ProposerError                     # noqa: E402
-from pramaan.llm.propose import ClaudeProposer                   # noqa: E402
-from pramaan.llm.prompt import prompt_identity                   # noqa: E402
-from pramaan.state.contract import StateRequest                  # noqa: E402
-from pramaan.state.fixture import FixtureStateProvider           # noqa: E402
+from attest.core.pipeline import evaluate                       # noqa: E402
+from attest.fixtures import scenarios as fx                     # noqa: E402
+from attest.llm.errors import ProposerError                     # noqa: E402
+from attest.llm.propose import ClaudeProposer                   # noqa: E402
+from attest.llm.prompt import prompt_identity                   # noqa: E402
+from attest.state.contract import StateRequest                  # noqa: E402
+from attest.state.fixture import FixtureStateProvider           # noqa: E402
 
 
 def main() -> int:

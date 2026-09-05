@@ -1,6 +1,6 @@
-# Pramaan
+# Attest
 
-**Pramaan checks every factual claim in an AI agent's customer message against a frozen snapshot of the merchant's real data, and records a proof that anyone can re-verify later without re-running the model.**
+**Attest checks every factual claim in an AI agent's customer message against a frozen snapshot of the merchant's real data, and records a proof that anyone can re-verify later without re-running the model.**
 
 *Pramāṇa* — in Indian epistemology, the means by which a claim becomes valid knowledge. Here: no claim ships without proof.
 
@@ -12,10 +12,10 @@ An AI recovery agent drafts this message:
 
 > "This is our final attempt. Your 15% offer expires in 24 hours."
 
-Is it true? **You cannot tell from the text.** Run it through Pramaan twice, changing exactly one field of authoritative state:
+Is it true? **You cannot tell from the text.** Run it through Attest twice, changing exactly one field of authoritative state:
 
 ```
-$ python -m pramaan demo
+$ python -m attest demo
 
 BEAT 1  same message, one authoritative state field changed
   final_attempt  -> SEND      # subscription.attempt_index = 4 of 4
@@ -24,11 +24,11 @@ BEAT 1  same message, one authoritative state field changed
 
 Same sentence. Different truth. Under India's CCPA dark-pattern guidelines the second version is an enumerated offence — and no text classifier, however good, can separate them, because **falsity is not a property of text.** It requires joining the claim to live merchant state.
 
-## What Pramaan proves — exact wording
+## What Attest proves — exact wording
 
 > *This claim was, or was not, supported by this authoritative state at this recorded snapshot.*
 
-## What Pramaan does NOT prove
+## What Attest does NOT prove
 
 Read this before the features.
 
@@ -44,7 +44,7 @@ Read this before the features.
 
 The closest published system is **ProvenanceGuard** ([arXiv 2606.18037](https://arxiv.org/abs/2606.18037), June 2026): a post-generation verification layer for MCP tool-using agents that decomposes answers into atomic claims, routes them to source-specific evidence, and fails closed. **That architectural pattern is theirs and the wider attribution literature's, not mine.** Structured claims validated deterministically is described in that literature as the working default, not as an invention.
 
-Pramaan differs in what it verifies *against*: ProvenanceGuard checks attribution to static retrieved documents and states explicitly that proving a source correct is out of scope. Pramaan checks truth against **live, mutable transactional state owned by the party that benefits from the claim being believed**. Same shape, harder trust model, different domain.
+Attest differs in what it verifies *against*: ProvenanceGuard checks attribution to static retrieved documents and states explicitly that proving a source correct is out of scope. Attest checks truth against **live, mutable transactional state owned by the party that benefits from the claim being believed**. Same shape, harder trust model, different domain.
 
 Honest novelty score for the mechanism: low. The domain transfer and trust model are where the work is.
 
@@ -54,16 +54,16 @@ Honest novelty score for the mechanism: low. The domain transfer and trust model
 
 ```bash
 pip install -r requirements.txt
-python -m pramaan demo                       # all four beats + cooldown lifecycle
-python -m pramaan recheck --db pramaan.db --all
+python -m attest demo                       # all four beats + cooldown lifecycle
+python -m attest recheck --db attest.db --all
 python -m pytest tests/ -q                   # 422 tests, fully offline
-python -m pramaan serve                      # local web UI on 127.0.0.1:8000
+python -m attest serve                      # local web UI on 127.0.0.1:8000
 ```
 
-The default configuration is fully simulated. `python -m pramaan status` prints the mode banner; simulated state is never displayed as live.
+The default configuration is fully simulated. `python -m attest status` prints the mode banner; simulated state is never displayed as live.
 
 ```bash
-python -m pramaan evaluate \
+python -m attest evaluate \
   --draft "This is our final attempt. Your 15% offer expires in 24 hours." \
   --customer alice --scenario final_attempt --now 2026-09-04T10:00:00+00:00
 ```
@@ -72,10 +72,10 @@ python -m pramaan evaluate \
 
 | Beat | What it shows | Command |
 |---|---|---|
-| **1 — State flip** | Same message, one state field changed, verdict flips | `python -m pramaan demo` |
+| **1 — State flip** | Same message, one state field changed, verdict flips | `python -m attest demo` |
 | **2 — Forged evidence** | Model cites a well-formed but nonexistent offer id → `ESCALATE` | same |
 | **3 — Silent omission** | Model drops a claim; *independent* coverage catches it → `BLOCK` | same |
-| **4 — Offline replay** | Every decision re-derived with no model and no network | `python -m pramaan recheck --all` |
+| **4 — Offline replay** | Every decision re-derived with no model and no network | `python -m attest recheck --all` |
 
 Beat 4 is the one to try yourself. Unset every credential, disconnect the network, and it still exits 0 — then corrupt one snapshot byte and it exits 1.
 
@@ -132,7 +132,7 @@ Beat 4 is the one to try yourself. Unset every credential, disconnect the networ
 
 ## SEND is not delivery
 
-An approved evaluation is **not** a delivery. Pramaan never observes a transport.
+An approved evaluation is **not** a delivery. Attest never observes a transport.
 
 ```
 evaluate → SEND          → no send_log row, cooldown untouched
@@ -158,7 +158,7 @@ retry commit             → already_committed, still one row
 | Component | Status |
 |---|---|
 | Deterministic core | **Working**, 422 offline tests |
-| Web UI | **Working**, offline. A rendering layer only — it computes no verdict, disposition, coverage or policy decision; `tests/test_web.py` enforces this by AST and by comparing every API response against a direct `Pramaan.evaluate()` call |
+| Web UI | **Working**, offline. A rendering layer only — it computes no verdict, disposition, coverage or policy decision; `tests/test_web.py` enforces this by AST and by comparing every API response against a direct `Attest.evaluate()` call |
 | Fixture state provider | **Working**, SIMULATED, no credentials |
 | Anthropic proposer | **Adapter complete, tested against a fake transport. No live call has ever been made.** |
 | Razorpay state provider | **Boundary skeleton only.** 9 of 12 field mappings unresolved; `get_state` raises rather than guessing endpoint shapes |
@@ -166,7 +166,7 @@ retry commit             → already_committed, still one row
 
 ## Kill test
 
-`killtest/` holds a frozen 70-case benchmark (35 dev / 35 held-out) comparing three arms: text-only LLM (B1), LLM with state (B2), and Pramaan's shipped path (B3).
+`killtest/` holds a frozen 70-case benchmark (35 dev / 35 held-out) comparing three arms: text-only LLM (B1), LLM with state (B2), and Attest's shipped path (B3).
 
 **It has not been run. There is no accuracy result.** The harness asserts that B3 is the production `ClaudeProposer` + production prompt + production adjudicator, so it cannot silently measure a lookalike.
 
@@ -216,9 +216,9 @@ python -m pytest tests/ -q          # 422 tests, ~20s, no credentials, no networ
 ## Layout
 
 ```
-pramaan/
+attest/
   app.py          composition root — wires the chain, decides nothing
-  cli.py          python -m pramaan {status,evaluate,send,proof,suppress,recheck,demo,serve}
+  cli.py          python -m attest {status,evaluate,send,proof,suppress,recheck,demo,serve}
   config.py       selectors only, holds no secrets
   core/
     pipeline.py   the six stages

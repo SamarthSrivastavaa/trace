@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Attest — proof before send</title>
+<style>
+  :root{
+    --ink:#121211; --paper:#FBFAF8; --cream:#EFEDE6; --sand:#E4E1D7;
+    --rule:#D6D2C7; --rule-d:#2B2B28; --mut:#6E6B63; --mut-d:#8C887E;
+    --acc:#B0561F;
+    --ok:#14603A; --no:#9E2B20; --warn:#8B6310; --mal:#5E3A82;
+    --sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --serif:"Iowan Old Style",Charter,Georgia,Cambria,"Times New Roman",serif;
+    --mono:ui-monospace,"SF Mono","Cascadia Mono","Segoe UI Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);
+       font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1260px;margin:0 auto;padding:0 34px}
+  a{color:var(--acc);text-decoration:none;border-bottom:1px solid rgba(176,86,31,.32)}
+  a:hover{border-bottom-color:var(--acc)}
+  h1,h2,h3{margin:0;font-weight:520;letter-spacing:-.028em}
+  p{margin:0}
+  .mic{font:500 10px/1.3 var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--mut)}
+  .mic.a{color:var(--acc)}
+  .mono{font-family:var(--mono)}
+
+  /* ---------- masthead ---------- */
+  .nav{border-bottom:1px solid var(--rule);background:var(--paper);position:sticky;top:0;z-index:20}
+  .nav .wrap{display:flex;align-items:center;gap:28px;height:48px}
+  .mark{display:flex;align-items:center;gap:9px}
+  .mark u{width:9px;height:9px;background:var(--acc);display:block;
+          transform:rotate(45deg);position:relative;top:-1px}
+  .mark b{font:600 14.5px/1 var(--sans);letter-spacing:-.02em}
+  .nav nav{display:flex;gap:19px;margin-left:8px}
+  .nav nav a{border:0;color:var(--ink);font-size:12.5px;opacity:.7}
+  .nav nav a:hover{opacity:1}
+  .nav .right{margin-left:auto;display:flex;align-items:center;gap:15px}
+  .dot{width:6px;height:6px;background:var(--ok);display:inline-block;margin-right:6px}
+
+  .meta{border-bottom:1px solid var(--rule);background:var(--cream)}
+  .meta .wrap{display:flex;align-items:center;gap:24px;min-height:31px;flex-wrap:wrap}
+  .meta .right{margin-left:auto}
+  .meta b{color:var(--ink);font-weight:500}
+
+  /* ---------- hero ---------- */
+  .hero{background:var(--ink);color:#E9E6DF;padding:74px 0 60px}
+  .hero-g{display:grid;grid-template-columns:1.02fr .98fr;gap:70px}
+  .hero h1{font-size:clamp(38px,5vw,62px);line-height:.98;letter-spacing:-.038em;
+           margin:18px 0 26px;color:#fff;max-width:12ch}
+  .hero h1 i{font-style:normal;color:var(--acc)}
+  .hero p{color:var(--mut-d);max-width:50ch;margin-bottom:15px}
+  .hero p strong{color:#E6E3DC;font-weight:500}
+  .btns{display:flex;gap:11px;margin:30px 0 38px;flex-wrap:wrap}
+  .btn{font:500 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;
+       padding:14px 21px;border:1px solid #fff;background:#fff;color:var(--ink);cursor:pointer}
+  .btn:hover{opacity:.86}
+  .btn.o{background:transparent;color:#fff}
+  .btn.o:hover{background:rgba(255,255,255,.09);opacity:1}
+  .btn:disabled{opacity:.4;cursor:default}
+  .facts{display:flex;gap:46px;flex-wrap:wrap;padding-top:24px;border-top:1px solid var(--rule-d)}
+  .facts div span{display:block;margin-top:7px;font-size:12.5px;color:#D3CFC6}
+
+  /* ---------- the specimen: the message under examination ---------- */
+  .spec{border:1px solid var(--rule-d);background:#191917}
+  .spec-h{display:flex;align-items:center;gap:12px;padding:11px 18px;
+          border-bottom:1px solid var(--rule-d)}
+  .spec-h .right{margin-left:auto}
+  .spec-b{padding:26px 24px 22px}
+  .quote{font:400 21px/1.72 var(--serif);color:#F2EFE8;letter-spacing:-.004em}
+  .quote mark{background:transparent;color:inherit;padding:0;
+              border-bottom:2px solid var(--ok);position:relative}
+  .quote mark.un{border-bottom-color:var(--no);border-bottom-style:dashed}
+  .quote sup{font:500 9.5px/1 var(--mono);color:var(--acc);vertical-align:super;
+             margin-left:2px;letter-spacing:0}
+  .notes{list-style:none;margin:22px 0 0;padding:20px 0 0;border-top:1px solid var(--rule-d)}
+  .notes li{display:grid;grid-template-columns:20px 1fr auto;gap:12px;align-items:baseline;
+            padding:9px 0;border-bottom:1px solid #202020}
+  .notes li:last-child{border-bottom:0}
+  .notes u{font:500 9.5px/1 var(--mono);color:var(--acc);text-decoration:none}
+  .notes q{font-family:var(--mono);font-size:11.5px;color:#CFCBC2;quotes:none}
+  .notes q b{color:#7A7770;font-weight:400;margin-left:9px;letter-spacing:.08em;
+             text-transform:uppercase;font-size:9.5px}
+  .spec-f{padding:13px 18px;border-top:1px solid var(--rule-d);font:11px/1.5 var(--mono);
+          color:#6C6960}
+
+  /* ---------- pipeline band ---------- */
+  .band{background:var(--cream);border-bottom:1px solid var(--rule)}
+  .band .wrap{display:grid;grid-template-columns:repeat(7,1fr);gap:0}
+  .band div{padding:17px 16px 16px 0;border-right:1px solid var(--rule)}
+  .band div:last-child{border-right:0;padding-right:0}
+  .band div:not(:first-child){padding-left:16px}
+  .band s{display:block;text-decoration:none;font:500 9.5px/1 var(--mono);color:var(--acc);
+          letter-spacing:.1em;margin-bottom:9px}
+  .band b{display:block;font-weight:500;font-size:12.5px;letter-spacing:-.01em;margin-bottom:7px}
+  .band em{font-style:normal;font:11px/1.4 var(--mono);color:var(--mut);word-break:break-all}
+  .band .det b::after{content:" ◆";color:var(--acc);font-size:8px;vertical-align:middle}
+
+  /* ---------- sections ---------- */
+  section.pad{padding:80px 0;border-bottom:1px solid var(--rule)}
+  section.cream{background:var(--cream)}
+  .sec-g{display:grid;grid-template-columns:1.15fr .85fr;gap:62px;align-items:start}
+  .sec-g h2{font-size:clamp(29px,3.5vw,43px);line-height:1.04;letter-spacing:-.032em;max-width:15ch}
+  .sec-g h2 em{font-style:normal;color:var(--mut)}
+  .sec-g>p{color:var(--mut);font-size:14.5px;max-width:46ch;padding-top:9px}
+
+  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:42px;margin-top:58px}
+  .cols>div{border-top:2px solid var(--ink);padding-top:15px}
+  .cols>div.mid{border-top-color:var(--acc)}
+  .cols h3{font-size:17px;margin:15px 0 11px;letter-spacing:-.018em}
+  .cols h3.a{color:var(--acc)}
+  .cols p.b{font-size:13.8px;color:#33322E;line-height:1.6}
+
+  .boxes{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:52px}
+  .box{border:1px solid var(--ink);border-left:4px solid var(--ink);padding:19px 21px;
+       background:var(--paper)}
+  .box h4{margin:0 0 9px;font-size:14px;font-weight:550}
+  .box p{font-size:13.4px;color:#3B3A35;line-height:1.6}
+
+  /* ---------- workspace ---------- */
+  .ws{display:grid;grid-template-columns:1.05fr .95fr;gap:24px;margin-top:42px}
+  .pane{border:1px solid var(--rule);background:var(--paper)}
+  .pane-h{display:flex;align-items:center;gap:12px;padding:12px 18px;
+          border-bottom:1px solid var(--rule);background:var(--cream)}
+  .pane-h .right{margin-left:auto}
+  .pane-b{padding:18px}
+  textarea{width:100%;min-height:96px;resize:vertical;padding:15px;border:1px solid var(--rule);
+           background:var(--paper);color:var(--ink);font:17px/1.65 var(--serif);outline:0}
+  textarea:focus{border-color:var(--ink)}
+  select{padding:11px 12px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);
+         font:500 11px/1 var(--mono);letter-spacing:.05em;outline:0}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+  .btn.d{border-color:var(--ink);background:var(--ink);color:#fff}
+  .btn.g{background:transparent;border-color:var(--rule);color:var(--ink);padding:10px 16px}
+  .btn.g:hover{border-color:var(--ink);opacity:1}
+  pre{margin:0;font:12px/1.6 var(--mono);white-space:pre-wrap;word-break:break-word;
+      color:#33322E;max-height:320px;overflow:auto}
+  .why{font:11px/1.5 var(--mono);color:var(--mut);letter-spacing:.02em}
+  .err{color:var(--no);font:11px/1.5 var(--mono)}
+  .spin{font:11px/1.5 var(--mono);color:var(--mut)}
+
+  .disp{border:1px solid var(--ink);border-left:5px solid var(--ink);padding:18px 20px;
+        display:flex;align-items:baseline;gap:20px;flex-wrap:wrap;margin-top:8px;background:var(--paper)}
+  .disp .v{font:600 30px/1 var(--sans);letter-spacing:-.03em}
+  .disp .m{font-size:12px;color:var(--mut)}
+  .disp .m b{color:var(--ink);font-family:var(--mono);font-size:11px;letter-spacing:.06em}
+  .disp.SEND{border-left-color:var(--ok)} .disp.SEND .v{color:var(--ok)}
+  .disp.BLOCK{border-left-color:var(--no)} .disp.BLOCK .v{color:var(--no)}
+  .disp.ESCALATE{border-left-color:var(--warn)} .disp.ESCALATE .v{color:var(--warn)}
+
+  .st{font:500 10px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;
+      display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .st::before{content:"";width:7px;height:7px;background:currentColor;flex:none}
+  .st.SUPPORTED{color:var(--ok)} .st.CONTRADICTED{color:var(--no)}
+  .st.UNVERIFIABLE{color:var(--warn)} .st.MALFORMED{color:var(--mal)}
+
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;padding:0 14px 9px 0;border-bottom:1px solid var(--ink);
+     font:500 10px/1.3 var(--mono);letter-spacing:.12em;text-transform:uppercase;
+     color:var(--mut);white-space:nowrap}
+  td{padding:14px 14px 14px 0;border-bottom:1px solid var(--rule);vertical-align:top;font-size:13px}
+  td:last-child,th:last-child{padding-right:0}
+  .col-claim{width:34%} .col-state{width:36%}
+  td b{font-weight:550;font-size:13.5px}
+
+  .draft{border:1px solid var(--rule);background:var(--cream);padding:18px 20px;
+         font:19px/1.85 var(--serif)}
+  .draft mark{background:transparent;border-bottom:2px solid var(--ok);color:inherit;padding:0}
+  .draft mark.un{border-bottom-color:var(--no);border-bottom-style:dashed}
+
+  dl.kv{margin:0;display:grid;grid-template-columns:auto 1fr;gap:9px 20px;font:11px/1.5 var(--mono)}
+  dl.kv dt{color:var(--mut);letter-spacing:.09em;text-transform:uppercase}
+  dl.kv dd{margin:0;word-break:break-all;color:#33322E}
+  dl.kv dd.diff{color:var(--acc);font-weight:600;position:relative}
+  dl.kv dd.diff::after{content:"← the only difference";margin-left:11px;color:var(--mut);
+                       font-weight:400;letter-spacing:.04em}
+
+  .same{border:1px solid var(--ink);border-left:4px solid var(--acc);padding:15px 18px;
+        font-size:13.5px;margin-top:18px;background:var(--paper)}
+  .same b{font-family:var(--serif);font-size:16px;font-weight:400}
+  .flip{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .flip .pane-b{padding:20px}
+
+  .dark{background:var(--ink);color:#D5D1CA;border:0}
+  .dark h2{color:#fff}
+  .dark .sec-g>p{color:var(--mut-d)}
+  .lim{list-style:none;margin:32px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:0 42px}
+  .lim li{padding:15px 0;border-top:1px solid var(--rule-d);font-size:13.4px;color:#B5B1A9;
+          line-height:1.55;display:flex;gap:13px}
+  .lim li::before{content:"—";color:var(--acc);flex:none}
+
+  footer{padding:32px 0 44px;font-size:11.5px;color:var(--mut);line-height:1.7}
+  footer code{font-family:var(--mono);color:var(--ink)}
+
+  @media(max-width:1000px){
+    .hero-g,.sec-g,.ws,.flip,.boxes{grid-template-columns:1fr;gap:38px}
+    .cols,.lim{grid-template-columns:1fr}
+    .band .wrap{grid-template-columns:1fr 1fr}
+    .band div{border-right:0;border-bottom:1px solid var(--rule);padding-left:0!important}
+    .wrap{padding:0 20px}
+    .hero{padding:46px 0 38px}
+    section.pad{padding:52px 0}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <div class="mark"><u></u><b>Attest</b></div>
+    <nav>
+      <a href="#work">Verify</a><a href="#registers">Model</a>
+      <a href="#proof">Proof</a><a href="#flip">Flip</a><a href="#limits">Limits</a>
+    </nav>
+    <div class="right">
+      <span class="mic"><span class="dot"></span>MODEL <b id="b-model">—</b></span>
+      <span class="mic">STATE <b id="b-state">—</b></span>
+    </div>
+  </div>
+</header>
+
+<div class="meta">
+  <div class="wrap">
+    <span class="mic">POLICY <b id="b-policy">—</b></span>
+    <span class="mic">SNAPSHOT <b id="b-snap">not acquired</b></span>
+    <span class="mic right">DEMO MODE &middot; STATE AND PROPOSER ARE SIMULATED</span>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="wrap hero-g">
+    <div>
+      <div class="mic a">Evidence-bound messaging</div>
+      <h1>Every sentence is a <i>claim</i> somebody has to answer for.</h1>
+      <p>An AI-written customer message is self-asserted. Nobody reading
+         <em>&ldquo;this is our final attempt&rdquo;</em> can tell whether it is the final
+         attempt, whether the offer exists, or whether it expires when the sentence
+         says it does. The truth is not in the text.</p>
+      <p><strong>Attest freezes the merchant's authoritative state, lets the model
+         propose only what the message claims, and has deterministic code decide
+         whether each claim survives its evidence.</strong> Every decision writes a
+         proof anyone can recompute offline, without asking us to be trusted.</p>
+      <div class="btns">
+        <button class="btn" id="go">Examine a message</button>
+        <button class="btn o" id="flip">Run the state flip</button>
+      </div>
+      <div class="facts">
+        <div><span class="mic">State source</span><span>Fixture &middot; simulated</span></div>
+        <div><span class="mic">Proposer</span><span id="f-model">Deterministic mock</span></div>
+        <div><span class="mic">Live model calls</span><span>None, ever</span></div>
+      </div>
+    </div>
+
+    <div class="spec">
+      <div class="spec-h"><span class="mic a">Specimen</span>
+        <span class="mic right" id="spec-tag">not yet examined</span></div>
+      <div class="spec-b">
+        <div class="quote" id="spec">This is our final attempt. Your 15% offer expires in 24 hours.</div>
+        <ul class="notes" id="spec-notes">
+          <li><u>—</u><q>Press <b style="margin:0">Examine a message</b> to annotate this text
+            against frozen merchant state.</q><span></span></li>
+        </ul>
+      </div>
+      <div class="spec-f">Underlines and marginal notes come from the server. The page
+        detects nothing in this text on its own.</div>
+    </div>
+  </div>
+</section>
+
+<div class="band">
+  <div class="wrap">
+    <div class="det"><s>01</s><b>Normalise</b><em id="s1a">—</em></div>
+    <div class="det"><s>02</s><b>Gate</b><em id="s2a">—</em><em id="s2b"></em></div>
+    <div class="det"><s>03</s><b>Freeze state</b><em id="s3a">—</em></div>
+    <div><s>04</s><b>Propose claims</b><em id="s4a">—</em></div>
+    <div class="det"><s>05</s><b>Adjudicate</b><em id="s5a">—</em></div>
+    <div class="det"><s>06</s><b>Coverage</b><em id="s6a">—</em></div>
+    <div class="det"><s>07</s><b>Proof</b><em id="s7a">—</em></div>
+  </div>
+</div>
+
+<div class="meta">
+  <div class="wrap">
+    <span class="mic a">Run status</span>
+    <span class="mic" id="strip">No evaluation yet &middot; ◆ marks a deterministic stage;
+      step 04 is the only one a model touches</span>
+    <span class="mic right"><a href="#proof">Open the proof &rarr;</a></span>
+  </div>
+</div>
+
+<section class="pad" id="registers">
+  <div class="wrap">
+    <div class="sec-g">
+      <h2>Three authorities, <em>never blurred.</em></h2>
+      <p>Most systems collapse extraction, judgement and truth into one confident
+         sentence. Attest keeps them apart everywhere &mdash; in the type system, in
+         this interface, and in what it refuses to say.</p>
+    </div>
+    <div class="cols">
+      <div>
+        <span class="mic">01 &mdash; the model</span>
+        <h3>What it may say</h3>
+        <p class="b">A claim: its kind, the span of text it covers, the value it
+           asserts, and a citation into the frozen snapshot. The schema has no field
+           for a verdict, so a model attempting to state one fails to parse. It is not
+           trusted to abstain from deciding &mdash; it is unable to.</p>
+      </div>
+      <div class="mid">
+        <span class="mic">02 &mdash; the code</span>
+        <h3 class="a">What it decides</h3>
+        <p class="b">Whether each asserted value matches the evidence it cited, in the
+           snapshot frozen before the model ever saw it. No network, no database, no
+           clock, no randomness. The same claim against the same snapshot returns the
+           same verdict, permanently.</p>
+      </div>
+      <div>
+        <span class="mic">03 &mdash; neither</span>
+        <h3>What is never claimed</h3>
+        <p class="b">That the message is true in the world. Only that every checkable
+           claim in it resolved against recorded state under a recorded policy. A
+           qualitative promise this system cannot express is not verified, and is not
+           reported as though it were.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pad cream">
+  <div class="wrap">
+    <div class="sec-g">
+      <h2>Same words.<br>Different truth.</h2>
+      <p>The message is byte-identical in both runs. One field in the merchant's
+         subscription record differs. That is the entire difference, and it is enough
+         to invert the outcome &mdash; because the sentence was never the evidence.</p>
+    </div>
+    <div class="boxes">
+      <div class="box">
+        <h4>Approval is not delivery</h4>
+        <p>SEND means no deterministic reason to block or escalate was found. It does
+           not mean anything was delivered. Attest never observes a transport, so a
+           SEND proof writes no send record; only a caller reporting real delivery
+           consumes the cooldown.</p>
+      </div>
+      <div class="box">
+        <h4>Replay needs no permission</h4>
+        <p>Re-verification recomputes the decision from the stored snapshot under the
+           policy recorded with that proof. It does not re-ask the model and makes no
+           network call. Anyone holding the database can run it and disagree with us.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pad" id="work">
+  <div class="wrap">
+    <div class="sec-g">
+      <h2>The examination bench.</h2>
+      <p>Edit the message, choose which authoritative state to serve, and run a real
+         evaluation. Every value that appears was returned by the application, not
+         assembled in the browser.</p>
+    </div>
+
+    <div class="ws">
+      <div class="pane">
+        <div class="pane-h"><span class="mic">Draft message</span>
+          <span class="mic right" id="status"></span></div>
+        <div class="pane-b">
+          <textarea id="draft">This is our final attempt. Your 15% offer expires in 24 hours.</textarea>
+          <div class="row">
+            <select id="scenario">
+              <option value="final_attempt">STATE — ATTEMPT 4 OF 4</option>
+              <option value="first_attempt">STATE — ATTEMPT 1 OF 4</option>
+            </select>
+            <button class="btn d" id="go2">Examine</button>
+          </div>
+          <div class="row"><span class="why" id="calls"></span></div>
+        </div>
+      </div>
+
+      <div class="pane">
+        <div class="pane-h"><span class="mic">Authoritative state</span>
+          <span class="mic right">SIMULATED &middot; hand-written fixture</span></div>
+        <div class="pane-b">
+          <pre id="state">Run an examination to load the recorded snapshot.</pre>
+        </div>
+      </div>
+    </div>
+
+    <div id="result" style="display:none">
+      <div style="margin-top:42px">
+        <span class="mic a">Disposition</span>
+        <div class="disp" id="disp">
+          <div class="v" id="disp-v">—</div>
+          <div class="m" id="disp-m"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:42px">
+        <span class="mic a">Claim, evidence, verdict</span>
+        <div class="ws" style="margin-top:14px">
+          <div class="pane">
+            <div class="pane-h"><span class="mic">The message, as adjudicated</span></div>
+            <div class="pane-b"><div class="draft" id="marked"></div>
+              <p class="why" style="margin-top:12px">Solid rule &mdash; adjudicated.
+                 Dashed red &mdash; a checkable span nothing accounted for.</p></div>
+          </div>
+          <div class="pane">
+            <div class="pane-h"><span class="mic">Coverage sweep</span>
+              <span class="mic right" id="cov-sum"></span></div>
+            <div class="pane-b">
+              <table><thead><tr><th>Span</th><th>Kind</th><th>Offset</th>
+                <th>Adjudicated by</th></tr></thead><tbody id="cov"></tbody></table>
+            </div>
+          </div>
+        </div>
+
+        <div class="pane" style="margin-top:20px">
+          <div class="pane-b">
+            <table>
+              <thead><tr><th class="col-claim">Claim asserted by the model</th>
+                <th class="col-state">Value found in the snapshot</th>
+                <th>Verdict from deterministic code</th></tr></thead>
+              <tbody id="verdicts"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:42px" id="proof">
+        <span class="mic a">Proof and offline replay</span>
+        <div class="ws" style="margin-top:14px">
+          <div class="pane">
+            <div class="pane-h"><span class="mic">Append-only proof</span></div>
+            <div class="pane-b">
+              <p class="why" style="margin-bottom:14px">UPDATE and DELETE are refused
+                 by database triggers. That is not file-level tamper resistance, and we
+                 do not claim it.</p>
+              <dl class="kv" id="proof-kv"></dl>
+              <div class="row">
+                <button class="btn g" id="raw">Raw proof</button>
+                <button class="btn g" id="replay">Replay offline</button>
+              </div>
+              <pre id="rawout" style="display:none;margin-top:14px"></pre>
+            </div>
+          </div>
+          <div class="pane">
+            <div class="pane-h"><span class="mic">Recomputation</span></div>
+            <div class="pane-b">
+              <p class="why" style="margin-bottom:14px">Replay does not re-ask the
+                 model. It recomputes the decision from the recorded policy and
+                 snapshot, then compares. No network call.</p>
+              <div id="replayout" class="spin">Not run yet.</div>
+              <p class="why" style="margin-top:14px">To watch detection work, tamper
+                 with a stored snapshot from a terminal, then press Replay again:<br>
+                 <span class="mono" style="color:#33322E">python scripts/tamper_demo.py
+                 &lt;your db&gt;</span><br>There is deliberately no tamper endpoint. The
+                 attack lives in a script, outside the package.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pad cream" id="flip">
+  <div class="wrap">
+    <div class="sec-g">
+      <h2>One field, <em>opposite outcome.</em></h2>
+      <p>Two real evaluations through the same API, back to back. The draft is
+         byte-identical. Only <span class="mono">subscription.attempt_index</span>
+         differs, and the snapshot hashes prove the state genuinely changed.</p>
+    </div>
+    <div class="row" style="margin-top:32px">
+      <button class="btn d" id="flip2">Run both scenarios</button>
+      <span class="spin" id="flipstatus"></span>
+    </div>
+    <div class="same" id="samemsg" style="display:none"></div>
+    <div class="flip" style="margin-top:20px">
+      <div class="pane" id="A" style="display:none"></div>
+      <div class="pane" id="B" style="display:none"></div>
+    </div>
+  </div>
+</section>
+
+<section class="pad dark" id="limits">
+  <div class="wrap">
+    <div class="sec-g">
+      <h2>What this does <em>not</em> prove.</h2>
+      <p id="lim-mode"></p>
+    </div>
+    <ul class="lim" id="lim"></ul>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Every value on this page was produced by <code>attest.app.Attest.evaluate()</code>
+    or read back from storage. This page contains no verdict, disposition, policy or
+    coverage logic &mdash; <code>tests/test_web.py</code> enforces that by AST
+    inspection and by comparing each API response against a direct call.
+  </div>
+</footer>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = t => String(t).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const val = v => v == null ? "—" : (typeof v === "object" ? esc(JSON.stringify(v.value ?? v)) : esc(v));
+const set = (id, v) => { const el = $(id); if (el) el.textContent = v; };
+
+async function api(path, body){
+  const r = await fetch(path, body ? {method:"POST", headers:{"Content-Type":"application/json"},
+                                     body:JSON.stringify(body)} : {});
+  const j = await r.json();
+  if (j.error) throw new Error(j.error);
+  return j;
+}
+
+/* Render the draft with spans the BACKEND returned. No claim detection here.
+   `n` optionally numbers each mark so the marginal notes can refer to it. */
+function marked(text, spans, n){
+  const pts = spans.slice().sort((a,b)=>a.start-b.start);
+  let out = "", at = 0, i = 0;
+  for (const s of pts){
+    if (s.start < at) continue;
+    i += 1;
+    out += esc(text.slice(at, s.start));
+    out += `<mark class="${s.covered_by ? "" : "un"}" title="${esc(s.kind)}${
+      s.covered_by ? " · covered by " + esc(s.covered_by) : " · NOT adjudicated"}">${
+      esc(text.slice(s.start, s.end))}</mark>` + (n ? `<sup>${i}</sup>` : "");
+    at = s.end;
+  }
+  return out + esc(text.slice(at));
+}
+
+function specimen(d){
+  $("#spec").innerHTML = marked(d.proof.message, d.coverage.spans, true);
+  set("#spec-tag", `${d.coverage.spans.length} checkable spans · ${d.claims.length} claims`);
+  $("#spec-notes").innerHTML = d.coverage.spans.length
+    ? d.coverage.spans.map((s, i) => `<li><u>${i+1}</u>
+        <q>${esc(s.text)}<b>${esc(s.kind)}</b></q>
+        <span class="st ${s.covered_by ? "SUPPORTED" : "CONTRADICTED"}">${
+          s.covered_by ? esc(s.covered_by) : "unadjudicated"}</span></li>`).join("")
+    : `<li><u>—</u><q>No checkable spans in this text.</q><span></span></li>`;
+}
+
+function render(d){
+  $("#result").style.display = "";
+  set("#b-model", d.mode.model);
+  set("#b-state", d.mode.state);
+  set("#f-model", d.proof.model_id);
+  set("#b-policy", d.proof.policy_version);
+  set("#b-snap", d.proof.snapshot_hash ? d.proof.snapshot_hash.slice(0,24) + "…"
+                                       : "not acquired");
+  $("#state").textContent = d.snapshot
+    ? JSON.stringify(d.snapshot, null, 2)
+    : "No snapshot — the gate denied this request before any state was acquired.";
+  $("#calls").textContent =
+    `this evaluation → provider calls: ${d.calls.provider} · proposer calls: ${d.calls.proposer}`;
+
+  specimen(d);
+
+  /* pipeline band — every figure is a direct read of what the server returned */
+  set("#s1a", d.proof.message.length + " chars, NFC");
+  set("#s2a", d.gate.decision);
+  set("#s2b", d.gate.reason_code);
+  set("#s3a", d.proof.snapshot_hash ? d.proof.snapshot_hash.slice(0,14) + "…" : "none acquired");
+  set("#s4a", d.claims.length + " proposed · " + d.proof.model_id);
+  set("#s5a", d.verdicts.length + " adjudicated");
+  set("#s6a", d.coverage.spans.length + " spans · " + (d.coverage.passed ? "complete" : "incomplete"));
+  set("#s7a", d.proof.proof_id);
+  set("#strip", `${d.claims.length} claims proposed · ${d.coverage.spans.length} spans checked `
+    + `· policy ${d.proof.policy_version} · proof ${d.proof.proof_id}`);
+
+  const disp = $("#disp");
+  disp.className = "disp " + d.disposition;
+  set("#disp-v", d.disposition);
+  $("#disp-m").innerHTML = `gate <b>${esc(d.gate.reason_code)}</b>` +
+    (d.proof.failure_reason ? ` · failure <b>${esc(d.proof.failure_reason)}</b>` : "") +
+    `<br><span class="why">produced by the deterministic pipeline, not by the model</span>`;
+
+  $("#marked").innerHTML = marked(d.proof.message, d.coverage.spans, false);
+
+  $("#verdicts").innerHTML = d.verdicts.length ? d.verdicts.map(v => `
+    <tr>
+      <td class="col-claim"><b>${esc(v.kind)}</b><br>
+        <span class="why">asserts ${val(v.asserted)}</span></td>
+      <td class="col-state">${v.observed ? val(v.observed) : "<span class='why'>no value</span>"}<br>
+        <span class="why">${v.evidence ? esc(JSON.stringify(v.evidence)) : "no evidence cited"}</span></td>
+      <td><span class="st ${esc(v.status)}">${esc(v.status)}</span><br>
+        <span class="why">${esc(v.reason_code)}</span></td>
+    </tr>`).join("") :
+    `<tr><td colspan="3" class="why">No claims adjudicated — see the disposition above.</td></tr>`;
+
+  $("#cov-sum").innerHTML = `<span class="st ${d.coverage.passed ? "SUPPORTED":"CONTRADICTED"}">` +
+    `${d.coverage.passed ? "complete" : "incomplete"}</span>`;
+  $("#cov").innerHTML = d.coverage.spans.map(s => `
+    <tr><td class="mono">${esc(s.text)}</td><td class="why">${esc(s.kind)}</td>
+        <td class="why">${s.start}–${s.end}</td>
+        <td>${s.covered_by ? `<span class="why">${esc(s.covered_by)}</span>`
+          : "<span class='st CONTRADICTED'>unadjudicated</span>"}</td></tr>`).join("")
+    || `<tr><td colspan="4" class="why">No checkable spans detected.</td></tr>`;
+
+  $("#proof-kv").innerHTML = [
+    ["proof", d.proof.proof_id], ["snapshot", d.proof.snapshot_hash || "none acquired"],
+    ["policy", d.proof.policy_version], ["gate", d.gate.decision + " / " + d.gate.reason_code],
+    ["state source", d.proof.state_source || "—"], ["proposer", d.proof.model_id],
+    ["written at", d.proof.created_at],
+  ].map(([k,v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+  window.__proofId = d.proof.proof_id;
+}
+
+async function verify(){
+  const btns = [$("#go"), $("#go2")];
+  btns.forEach(b => b.disabled = true);
+  $("#status").textContent = "examining…";
+  set("#spec-tag", "examining…");
+  try{
+    render(await api("/api/verify", {draft: $("#draft").value,
+      scenario: $("#scenario").value, customer_id: "cus_" + Date.now()}));
+    $("#status").textContent = "";
+  }catch(e){ $("#status").innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+  btns.forEach(b => b.disabled = false);
+}
+
+function panel(el, d, label){
+  const s = d.snapshot && d.snapshot.subscription ? d.snapshot.subscription : {};
+  el.style.display = "";
+  el.innerHTML = `<div class="pane-h"><span class="mic">${esc(label)}</span></div>
+    <div class="pane-b">
+      <div class="disp ${d.disposition}" style="margin-top:0">
+        <div class="v">${d.disposition}</div>
+        <div class="m"><span class="why">gate ${esc(d.gate.reason_code)}</span></div></div>
+      <dl class="kv" style="margin-top:18px">
+        <dt>attempt_index</dt><dd class="diff">${esc(s.attempt_index)}</dd>
+        <dt>max_attempts</dt><dd>${esc(s.max_attempts)}</dd>
+        <dt>snapshot</dt><dd>${esc((d.proof.snapshot_hash||"").slice(0,32))}…</dd>
+        <dt>proof</dt><dd>${esc(d.proof.proof_id)}</dd>
+      </dl></div>`;
+}
+
+async function runFlip(){
+  const btns = [$("#flip"), $("#flip2")];
+  btns.forEach(b => b.disabled = true);
+  $("#flipstatus").textContent = "running two evaluations…";
+  try{
+    const draft = $("#draft").value, t = Date.now();
+    const a = await api("/api/verify", {draft, scenario:"final_attempt", customer_id:"flipA_"+t});
+    const c = await api("/api/verify", {draft, scenario:"first_attempt",  customer_id:"flipB_"+t});
+    panel($("#A"), a, "Run A · attempt 4 of 4");
+    panel($("#B"), c, "Run B · attempt 1 of 4");
+    $("#samemsg").style.display = "";
+    $("#samemsg").innerHTML =
+      `Sent to both runs, byte-identical: <b>&ldquo;${esc(draft)}&rdquo;</b><br>` +
+      `<span class="why">both evaluated through POST /api/verify → Attest.evaluate(); ` +
+      `snapshot hashes differ, so the state genuinely differed.</span>`;
+    $("#flipstatus").textContent = "";
+    $("#flip").scrollIntoView({behavior:"smooth", block:"start"});
+  }catch(e){ $("#flipstatus").innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+  btns.forEach(b => b.disabled = false);
+}
+
+async function replay(){
+  $("#replayout").textContent = "recomputing…";
+  try{
+    const r = await api("/api/recheck", {});
+    const bad = r.results.filter(x => !x.ok);
+    $("#replayout").innerHTML =
+      `<span class="st ${bad.length ? "CONTRADICTED":"SUPPORTED"}">` +
+      `${bad.length ? "integrity check failed" : "all proofs re-verified"}</span>
+       <div class="why" style="margin-top:10px">${r.results.length - bad.length}/${r.results.length}
+       recomputed · send-log ${r.send_log.ok ? "OK" : "FAILED"}</div>` +
+      (bad.length ? `<pre style="margin-top:12px">${esc(bad.map(x =>
+        x.proof_id + "\n  " + x.problems.join("\n  ")).join("\n"))}</pre>` : "");
+  }catch(e){ $("#replayout").innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+}
+
+async function raw(){
+  const el = $("#rawout");
+  if (el.style.display !== "none"){ el.style.display = "none"; return; }
+  el.style.display = ""; el.textContent = "loading…";
+  try{ el.textContent = JSON.stringify(await api("/api/proof/" + window.__proofId), null, 2); }
+  catch(e){ el.textContent = e.message; }
+}
+
+(async function init(){
+  $("#go").onclick = verify; $("#go2").onclick = verify;
+  $("#flip").onclick = runFlip; $("#flip2").onclick = runFlip;
+  $("#replay").onclick = replay; $("#raw").onclick = raw;
+  try{
+    const l = await api("/api/limitations");
+    set("#b-model", l.mode.model);
+    set("#b-state", l.mode.state);
+    set("#lim-mode", l.mode.note);
+    $("#lim").innerHTML = l.not_proven.map(x => `<li>${esc(x)}</li>`).join("");
+  }catch(e){ $("#lim").innerHTML = `<li class="err">${esc(e.message)}</li>`; }
+})();
+</script>
+</body>
+</html>

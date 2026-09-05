@@ -1,13 +1,13 @@
 """Runnable entrypoint.
 
-    python -m pramaan status
-    python -m pramaan evaluate --draft "..." --customer c1 --scenario final_attempt
-    python -m pramaan send     --draft "..." --customer c1 --scenario final_attempt
-    python -m pramaan proof <proof_id>
-    python -m pramaan suppress --customer c1
-    python -m pramaan recheck --all
-    python -m pramaan demo
-    python -m pramaan serve                      # local web UI, same engine
+    python -m attest status
+    python -m attest evaluate --draft "..." --customer c1 --scenario final_attempt
+    python -m attest send     --draft "..." --customer c1 --scenario final_attempt
+    python -m attest proof <proof_id>
+    python -m attest suppress --customer c1
+    python -m attest recheck --all
+    python -m attest demo
+    python -m attest serve                      # local web UI, same engine
 
 Defaults are fully simulated: no credentials, no network. Every command prints
 a MODE banner so simulated state can never be mistaken for live.
@@ -22,12 +22,12 @@ import argparse
 import json
 import sys
 
-from .app import Pramaan
+from .app import Attest
 from .config import AppConfig, ConfigError, ProposerChoice, StateProviderChoice
 from .storage import db
 
 
-def _banner(app: Pramaan) -> None:
+def _banner(app: Attest) -> None:
     print(f"MODE   {app.mode}")
     print(f"db     {app.config.db_path}")
     print(f"policy {app.policy_identity()}")
@@ -37,13 +37,13 @@ def _banner(app: Pramaan) -> None:
     print()
 
 
-def _build(args) -> Pramaan:
+def _build(args) -> Attest:
     cfg = AppConfig.from_env(
         db_path=args.db,
         state_provider=args.state_provider,
         proposer=args.proposer,
         policy_path=args.policy)
-    return Pramaan(cfg)
+    return Attest(cfg)
 
 
 def _print_outcome(o) -> None:
@@ -120,7 +120,7 @@ def cmd_suppress(args) -> int:
 def cmd_recheck(args) -> int:
     """Delegates to the single replay implementation."""
     import recheck
-    argv = ["--db", args.db or "pramaan.db"]
+    argv = ["--db", args.db or "attest.db"]
     argv += ["--all"] if args.all else ["--proof", args.proof_id or ""]
     if args.allow_policy_drift:
         argv.append("--allow-policy-drift")
@@ -168,7 +168,7 @@ def cmd_demo(args) -> int:
     c = app.process(fx.DRAFT, "m_demo", "life", "final_attempt", now=T1)
     print(f"  re-evaluate +1h   -> {c.disposition.value} ({c.gate_reason})")
 
-    print(f"\nBEAT 4  replay:  python -m pramaan recheck --db "
+    print(f"\nBEAT 4  replay:  python -m attest recheck --db "
           f"{app.config.db_path} --all")
     app.close()
     return 0
@@ -176,7 +176,7 @@ def cmd_demo(args) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="pramaan", description=__doc__,
+        prog="attest", description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--db", default=None)
     p.add_argument("--state-provider", default=None,

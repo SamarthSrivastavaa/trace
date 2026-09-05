@@ -73,7 +73,7 @@ def build_policy(config: AppConfig):
             else load_default_policy())
 
 
-class Pramaan:
+class Attest:
     """The application. Construct once, call `process` per request."""
 
     def __init__(self, config: AppConfig | None = None, *, provider=None,

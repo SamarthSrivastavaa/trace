@@ -66,8 +66,8 @@ def _defines(name: str) -> list[str]:
 def test_exactly_one_implementation_of_each_deterministic_primitive(func):
     """A second copy of any of these is a second trust boundary.
 
-    Asserted on FUNCTION DEFINITIONS, not filenames: pramaan/policy/schema.py
-    and pramaan/core/verify/schema.py legitimately share a filename while being
+    Asserted on FUNCTION DEFINITIONS, not filenames: attest/policy/schema.py
+    and attest/core/verify/schema.py legitimately share a filename while being
     different concerns (policy documents vs claim types). A stem-based check
     flagged that as duplication, which was a brittle test, not a real finding.
     """
@@ -82,7 +82,7 @@ def test_policy_reuses_the_single_canonicalisation():
     ones, and the real import here is `from ..core.verify.canonical import
     canonicalise`, which that helper cannot see.
     """
-    tree = ast.parse((ROOT / "pramaan" / "policy" / "loader.py")
+    tree = ast.parse((ROOT / "attest" / "policy" / "loader.py")
                      .read_text(encoding="utf-8"))
     modules = [node.module or "" for node in ast.walk(tree)
                if isinstance(node, ast.ImportFrom)]
@@ -92,10 +92,10 @@ def test_policy_reuses_the_single_canonicalisation():
 
 def test_deterministic_core_runs_without_api_key(monkeypatch):
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-    from pramaan.core.pipeline import evaluate
-    from pramaan.fixtures import scenarios as fx
-    from pramaan.state.contract import StateRequest
-    from pramaan.state.fixture import FixtureStateProvider
+    from attest.core.pipeline import evaluate
+    from attest.fixtures import scenarios as fx
+    from attest.state.contract import StateRequest
+    from attest.state.fixture import FixtureStateProvider
     r = evaluate(fx.DRAFT, StateRequest("m", "c", "final_attempt"),
                  FixtureStateProvider(), fx.mock_model)
     assert r["disposition"].value == "SEND"
@@ -150,7 +150,7 @@ def test_adapter_output_is_canonicalisable():
     import json
 
     from adapt import dataset_state_to_snapshot
-    from pramaan.core.verify.canonical import snapshot_hash
+    from attest.core.verify.canonical import snapshot_hash
     cases = json.loads((ROOT / "killtest" / "dataset.json").read_text(encoding="utf-8"))
     for c in cases:
         snapshot_hash(dataset_state_to_snapshot(c["state"]))
@@ -170,13 +170,13 @@ def test_b3_label_uses_production_schema_and_rules():
     """End-to-end through the real contract, no model involved.
 
     Phase 9 moved schema validation into the production adapter
-    (pramaan.llm.propose.to_proposal), so b3_label now receives an already
+    (attest.llm.propose.to_proposal), so b3_label now receives an already
     validated Proposal. The invariant is unchanged - production schema, then
     production rules - only the seam moved.
     """
     import run_arms
     from adapt import dataset_state_to_snapshot
-    from pramaan.llm.propose import to_proposal
+    from attest.llm.propose import to_proposal
     snap = dataset_state_to_snapshot(
         {"now": "2026-09-04T10:00:00+05:30",
          "subscription": {"status": "active", "attempt_index": 1,
@@ -193,7 +193,7 @@ def test_b3_label_uses_production_schema_and_rules():
 
 def test_b3_label_counts_fabricated_citation_separately():
     import run_arms
-    from pramaan.llm.propose import to_proposal
+    from attest.llm.propose import to_proposal
     snap = {"now": "2026-09-04T10:00:00+05:30", "offers": []}
     proposal = to_proposal({"claims": [{
         "claim_id": "c1", "kind": "discount_percent",
@@ -211,8 +211,8 @@ def test_production_validation_raises_on_schema_violation():
     The raise now comes from the production adapter, which is exactly where the
     live B3 arm hits it.
     """
-    from pramaan.llm.errors import ProposerSchemaViolation
-    from pramaan.llm.propose import to_proposal
+    from attest.llm.errors import ProposerSchemaViolation
+    from attest.llm.propose import to_proposal
     with pytest.raises(ProposerSchemaViolation):
         to_proposal({"claims": [{"claim_id": "c1", "kind": "vibes",
                                  "span_start": 0, "span_end": 1,
@@ -227,21 +227,21 @@ def _module_imports(rel: str) -> set[str]:
 
 def test_pipeline_does_not_import_razorpay():
     """The pipeline depends on the provider abstraction, not on a vendor."""
-    imports = _module_imports("pramaan/core/pipeline.py")
+    imports = _module_imports("attest/core/pipeline.py")
     assert not any("razorpay" in m.lower() for m in imports), imports
 
 
 def test_pipeline_does_not_import_a_concrete_provider():
     """Providers are injected. Importing one would hardwire the boundary."""
-    imports = _module_imports("pramaan/core/pipeline.py")
+    imports = _module_imports("attest/core/pipeline.py")
     assert not any("state.fixture" in m or "integrations" in m for m in imports), \
         imports
 
 
 @pytest.mark.parametrize("mod", [
-    "pramaan/core/verify/rules.py", "pramaan/core/verify/coverage.py",
-    "pramaan/core/verify/canonical.py", "pramaan/core/verify/normalise.py",
-    "pramaan/core/verify/schema.py"])
+    "attest/core/verify/rules.py", "attest/core/verify/coverage.py",
+    "attest/core/verify/canonical.py", "attest/core/verify/normalise.py",
+    "attest/core/verify/schema.py"])
 def test_verify_modules_do_not_import_providers_or_storage(mod):
     """The trust boundary must not reach for state or a database."""
     imports = _module_imports(mod)
@@ -252,7 +252,7 @@ def test_verify_modules_do_not_import_providers_or_storage(mod):
 
 
 @pytest.mark.parametrize("mod", [
-    "pramaan/state/fixture.py", "pramaan/integrations/razorpay/provider.py"])
+    "attest/state/fixture.py", "attest/integrations/razorpay/provider.py"])
 def test_providers_do_not_import_adjudication(mod):
     """A provider fetches state. It never decides what that state supports."""
     imports = _module_imports(mod)
@@ -275,13 +275,13 @@ def test_razorpay_provider_is_confined_to_its_package():
 
 def test_pipeline_does_not_write_send_log():
     """SEND is a decision. Recording a send is a separate, later fact."""
-    src = (ROOT / "pramaan" / "core" / "pipeline.py").read_text(encoding="utf-8")
+    src = (ROOT / "attest" / "core" / "pipeline.py").read_text(encoding="utf-8")
     for forbidden in ("commit_send", "send_log", "record_send"):
         assert forbidden not in src, f"pipeline references {forbidden}"
 
 
 def test_policy_gate_does_not_write_storage():
-    src = (ROOT / "pramaan" / "policy" / "gate.py").read_text(encoding="utf-8")
+    src = (ROOT / "attest" / "policy" / "gate.py").read_text(encoding="utf-8")
     for forbidden in ("INSERT", "UPDATE", "commit", "sqlite3", "conn"):
         assert forbidden not in src, f"gate.py references {forbidden}"
 
@@ -299,7 +299,7 @@ def test_only_storage_inserts_into_send_log():
 
 
 def test_delivery_module_has_no_network_or_vendor_imports():
-    imports = _module_imports("pramaan/delivery.py")
+    imports = _module_imports("attest/delivery.py")
     banned = ("socket", "requests", "httpx", "anthropic", "razorpay", "urllib",
               "smtplib", "twilio")
     hits = [m for m in imports if any(b in m.lower() for b in banned)]
@@ -313,6 +313,6 @@ def test_recheck_does_not_import_a_delivery_sender():
 
 def test_verify_modules_do_not_import_storage_or_delivery():
     for mod in ("rules", "coverage", "canonical", "normalise", "schema"):
-        imports = _module_imports(f"pramaan/core/verify/{mod}.py")
+        imports = _module_imports(f"attest/core/verify/{mod}.py")
         hits = [m for m in imports if "storage" in m or "delivery" in m]
         assert not hits, f"{mod}.py imports {hits}"

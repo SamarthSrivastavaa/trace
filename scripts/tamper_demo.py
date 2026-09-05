@@ -5,7 +5,7 @@
 
 WHY THIS SCRIPT EXISTS
 ----------------------
-No `python -m pramaan` command can do this, deliberately: production must not
+No `python -m attest` command can do this, deliberately: production must not
 ship an attack command. But the tamper-detection property cannot be shown
 without actually tampering, so the attack lives here, clearly labelled, outside
 the package.
@@ -16,7 +16,7 @@ deterministic.
 
 WHAT IT SIMULATES
 -----------------
-An attacker with write access to the database FILE. Pramaan does not defend
+An attacker with write access to the database FILE. Attest does not defend
 against that and does not claim to; the triggers stop ordinary SQL, which is
 why this script has to drop one first. What is being demonstrated is
 DETECTION, not prevention.
@@ -35,7 +35,7 @@ def tamper(db_path: str) -> int:
         "SELECT hash, canonical FROM snapshot "
         "WHERE canonical LIKE '%attempt_index%' LIMIT 1").fetchone()
     if row is None:
-        print(f"no suitable snapshot in {db_path}; run `python -m pramaan "
+        print(f"no suitable snapshot in {db_path}; run `python -m attest "
               f"--db {db_path} demo` first")
         return 2
 
@@ -56,7 +56,7 @@ def tamper(db_path: str) -> int:
     print(f"tampered snapshot {row['hash'][:16]}...")
     print(f"  subscription.attempt_index: {before} -> {after}")
     print("  (one field, in one stored snapshot; the proof row is untouched)")
-    print(f"\nnow run:  python -m pramaan --db {db_path} recheck --all")
+    print(f"\nnow run:  python -m attest --db {db_path} recheck --all")
     return 0
 
 

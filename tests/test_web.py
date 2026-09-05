@@ -19,15 +19,15 @@ import urllib.request
 
 import pytest
 
-from pramaan.app import Pramaan
-from pramaan.core.pipeline import FAILURE_STATE_ACQUISITION
-from pramaan.config import AppConfig
-from pramaan.storage import db
-from pramaan.web import server as web
+from attest.app import Attest
+from attest.core.pipeline import FAILURE_STATE_ACQUISITION
+from attest.config import AppConfig
+from attest.storage import db
+from attest.web import server as web
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-SERVER_SRC = (ROOT / "pramaan" / "web" / "server.py").read_text(encoding="utf-8")
-INDEX_SRC = (ROOT / "pramaan" / "web" / "index.html").read_text(encoding="utf-8")
+SERVER_SRC = (ROOT / "attest" / "web" / "server.py").read_text(encoding="utf-8")
+INDEX_SRC = (ROOT / "attest" / "web" / "index.html").read_text(encoding="utf-8")
 DRAFT = "This is our final attempt. Your 15% offer expires in 24 hours."
 
 
@@ -71,7 +71,7 @@ def live(tmp_path):
     httpd = web.build_server(AppConfig(db_path=db_path), port=port)
     thread = threading.Thread(target=httpd.serve_forever, daemon=True)
     thread.start()
-    # Hand back the PATH, not httpd.pramaan_app.conn: that connection is created
+    # Hand back the PATH, not httpd.attest_app.conn: that connection is created
     # in - and bound to - the serving thread. A test that borrowed it would get
     # a ProgrammingError. Tests open their own connection to the same file.
     yield Client(port), db_path
@@ -101,7 +101,7 @@ def test_api_verify_matches_a_direct_evaluate_call(live, tmp_path, scenario):
     api = client.post("/api/verify", {"draft": DRAFT, "scenario": scenario,
                                       "customer_id": "cmp", "now": None})
 
-    direct_app = Pramaan(AppConfig(db_path=str(tmp_path / "direct.db")))
+    direct_app = Attest(AppConfig(db_path=str(tmp_path / "direct.db")))
     try:
         direct = direct_app.evaluate(DRAFT, "m_web", "cmp", scenario)
     finally:
@@ -133,8 +133,8 @@ def test_the_equivalence_scenarios_reach_three_different_dispositions(live):
 
 
 def test_run_evaluation_delegates_to_the_app(monkeypatch, tmp_path):
-    """Spy on the boundary: the web layer must call Pramaan.evaluate()."""
-    app = Pramaan(AppConfig(db_path=str(tmp_path / "spy.db")))
+    """Spy on the boundary: the web layer must call Attest.evaluate()."""
+    app = Attest(AppConfig(db_path=str(tmp_path / "spy.db")))
     seen = {}
     real = app.evaluate
 
@@ -147,7 +147,7 @@ def test_run_evaluation_delegates_to_the_app(monkeypatch, tmp_path):
         web.run_evaluation(app, DRAFT, "m", "c", "final_attempt", None)
     finally:
         app.close()
-    assert seen.get("called"), "web layer bypassed Pramaan.evaluate()"
+    assert seen.get("called"), "web layer bypassed Attest.evaluate()"
 
 
 # --- 2. NO DECISION LOGIC IN THE WEB LAYER ---------------------------------
@@ -366,7 +366,7 @@ def test_mutating_verbs_are_rejected(live):
 
 def test_tamper_stays_a_script_outside_the_package():
     assert (ROOT / "scripts" / "tamper_demo.py").is_file()
-    assert not (ROOT / "pramaan" / "web" / "tamper.py").exists()
+    assert not (ROOT / "attest" / "web" / "tamper.py").exists()
 
 
 # --- 8. NO SECRET LEAKAGE --------------------------------------------------
@@ -400,14 +400,14 @@ def test_server_does_not_log_requests():
 def test_server_starts_and_serves_with_no_credentials(tmp_path):
     code = (
         "import json,sys,threading,urllib.request\n"
-        "from pramaan.config import AppConfig\n"
-        "from pramaan.web.server import build_server\n"
+        "from attest.config import AppConfig\n"
+        "from attest.web.server import build_server\n"
         "import socket\n"
         "s=socket.socket(); s.bind(('127.0.0.1',0)); port=s.getsockname()[1]; s.close()\n"
         f"h=build_server(AppConfig(db_path=r'{tmp_path / 'off.db'}'), port=port)\n"
         "threading.Thread(target=h.serve_forever, daemon=True).start()\n"
         "page=urllib.request.urlopen(f'http://127.0.0.1:{port}/').read().decode()\n"
-        "assert 'PRAMAAN' in page\n"
+        "assert 'attest' in page.lower()\n"   # brand present, not letter case
         "r=json.loads(urllib.request.urlopen(\n"
         "    urllib.request.Request(f'http://127.0.0.1:{port}/api/verify',\n"
         "    json.dumps({'draft':'Only 2 left.','scenario':'final_attempt',\n"
@@ -425,7 +425,7 @@ def test_server_starts_and_serves_with_no_credentials(tmp_path):
 
 
 def test_cli_exposes_serve_without_breaking_existing_commands():
-    from pramaan.cli import build_parser
+    from attest.cli import build_parser
     subs = build_parser()._subparsers._group_actions[0].choices
     assert "serve" in subs
     for existing in ("status", "evaluate", "send", "proof", "suppress",

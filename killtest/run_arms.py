@@ -9,13 +9,13 @@ Kill-test runner. Executes B1 / B2 / B3 under identical conditions.
 B3 IS THE SHIPPED SYSTEM
 ------------------------
 B3 has no harness-local prompt, parser, transport or model constant. It runs
-`pramaan.llm.propose.ClaudeProposer` over `AnthropicTransport` with the
+`attest.llm.propose.ClaudeProposer` over `AnthropicTransport` with the
 production `SYSTEM_PROMPT` and `extract_json_object`, then adjudicates with the
 production `Proposal` schema and `adjudicate_all`. Measuring anything else
 would measure a system that does not ship. `assert_b3_is_production()` fails
 the run if that ever drifts.
 
-The model identifier is owned by the production adapter (pramaan.llm.client)
+The model identifier is owned by the production adapter (attest.llm.client)
 and is never redeclared here.
 
 FAIRNESS RULES ENFORCED HERE:
@@ -40,15 +40,15 @@ import time
 
 D = pathlib.Path(__file__).parent
 sys.path.insert(0, str(D))                  # adapt.py, instrument.py
-sys.path.insert(0, str(D.parent))           # the pramaan package
+sys.path.insert(0, str(D.parent))           # the attest package
 
 from adapt import dataset_state_to_snapshot                        # noqa: E402
 from instrument import (CallRecord, Ledger, RecordingTransport,    # noqa: E402
                         classify, summarise)
-from pramaan.core.verify.rules import adjudicate_all               # noqa: E402
-from pramaan.core.verify.schema import Proposal, Status            # noqa: E402
-from pramaan.llm.client import MAX_TOKENS, MODEL                   # noqa: E402
-from pramaan.llm.prompt import prompt_identity                     # noqa: E402
+from attest.core.verify.rules import adjudicate_all               # noqa: E402
+from attest.core.verify.schema import Proposal, Status            # noqa: E402
+from attest.llm.client import MAX_TOKENS, MODEL                   # noqa: E402
+from attest.llm.prompt import prompt_identity                     # noqa: E402
 
 LABELS = ["SUPPORTED", "CONTRADICTED", "UNVERIFIABLE"]
 
@@ -75,7 +75,7 @@ B2_SYS = RUBRIC + """
 You are given the merchant's authoritative state as JSON. Reason over it freely.
 Return JSON: {"verdict": "...", "reasoning": "..."}"""
 
-# There is deliberately no B3_SYS. B3's prompt is pramaan.llm.prompt.SYSTEM_PROMPT.
+# There is deliberately no B3_SYS. B3's prompt is attest.llm.prompt.SYSTEM_PROMPT.
 
 
 def assert_b3_is_production() -> dict:
@@ -83,14 +83,14 @@ def assert_b3_is_production() -> dict:
 
     Fails the run rather than silently measuring a harness-local variant.
     """
-    from pramaan.llm import propose as prod_propose
-    from pramaan.llm.client import AnthropicTransport
-    from pramaan.llm.prompt import SYSTEM_PROMPT
+    from attest.llm import propose as prod_propose
+    from attest.llm.client import AnthropicTransport
+    from attest.llm.prompt import SYSTEM_PROMPT
 
     assert "B3_SYS" not in globals(), "harness kept a local B3 prompt"
     assert prod_propose.SYSTEM_PROMPT is SYSTEM_PROMPT, "B3 prompt is not production"
-    assert prod_propose.ClaudeProposer.__module__ == "pramaan.llm.propose"
-    assert AnthropicTransport.__module__ == "pramaan.llm.client"
+    assert prod_propose.ClaudeProposer.__module__ == "attest.llm.propose"
+    assert AnthropicTransport.__module__ == "attest.llm.client"
     return {"prompt_identity": prompt_identity(), "model": MODEL,
             "max_tokens": MAX_TOKENS,
             "proposer": f"{prod_propose.ClaudeProposer.__module__}."
@@ -175,9 +175,9 @@ def main(argv=None):
     except ImportError:
         sys.exit("pip install anthropic")
 
-    from pramaan.llm.client import AnthropicTransport
-    from pramaan.llm.errors import ProposerError
-    from pramaan.llm.propose import ClaudeProposer
+    from attest.llm.client import AnthropicTransport
+    from attest.llm.errors import ProposerError
+    from attest.llm.propose import ClaudeProposer
 
     client = anthropic.Anthropic()
     ledger = Ledger()

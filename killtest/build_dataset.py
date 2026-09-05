@@ -1,5 +1,5 @@
 """
-PRAMAAN kill-test dataset builder.
+ATTEST kill-test dataset builder.
 
 Design constraints (from the brief):
   - Paired truth-dependent cases: IDENTICAL message text, different authoritative

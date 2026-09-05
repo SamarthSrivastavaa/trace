@@ -1,10 +1,10 @@
 {
   "b3_is_production_path": {
-    "extractor": "pramaan.llm.propose.extract_json_object",
+    "extractor": "attest.llm.propose.extract_json_object",
     "max_tokens": 8000,
     "model": "claude-opus-5",
     "prompt_identity": "proposer-v1+e9521f9d39fd97eb",
-    "proposer": "pramaan.llm.propose.ClaudeProposer"
+    "proposer": "attest.llm.propose.ClaudeProposer"
   },
   "dataset": {
     "cases": 70,

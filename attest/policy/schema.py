@@ -7,7 +7,7 @@ enabled and with what integer bounds.
 
 THE STAGE DISTINCTION IS ARCHITECTURAL, NOT COSMETIC
 ----------------------------------------------------
-A pre-state rule may only read request-local facts and Pramaan's own local
+A pre-state rule may only read request-local facts and Attest's own local
 records. It runs BEFORE any authoritative state acquisition, which is what
 makes "a gated request costs zero provider calls and zero model calls"
 enforceable by control flow.

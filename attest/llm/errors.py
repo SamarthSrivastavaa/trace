@@ -1,6 +1,6 @@
 """Proposer failure taxonomy.
 
-Deliberately importable with no SDK and no credentials: pramaan.core.pipeline
+Deliberately importable with no SDK and no credentials: attest.core.pipeline
 imports these to map failures, and must not drag in the Anthropic SDK.
 
 The distinctions exist so an outage is never recorded as a reasoning failure:

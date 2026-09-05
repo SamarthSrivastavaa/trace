@@ -4,7 +4,7 @@ Identity is derived from the VALIDATED, canonicalised policy - never from raw
 file bytes. Reformatting a policy document (whitespace, key order) must not
 change what the policy IS; changing a bound must.
 
-Canonicalisation reuses pramaan.core.verify.canonical so there is exactly one
+Canonicalisation reuses attest.core.verify.canonical so there is exactly one
 canonical-identity implementation in the repository.
 """
 

@@ -5,7 +5,7 @@ matching, ONE finding spanning the whole draft satisfied every token
 (4 spans found, 0 uncovered, passed=True).
 """
 
-from pramaan.core.verify.coverage import MAX_SPAN_RATIO, check, find_spans, normalise
+from attest.core.verify.coverage import MAX_SPAN_RATIO, check, find_spans, normalise
 
 DRAFT = normalise("Get 40% off, expires in 24 hours. Only 2 left. Total Rs 4,999.")
 

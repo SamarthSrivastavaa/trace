@@ -107,9 +107,9 @@ def classify(exc: Exception) -> str:
     """Map a proposer exception to a failure class.
 
     Keeps model-output failures separate from infrastructure failures - the
-    whole point of the taxonomy in pramaan.llm.errors.
+    whole point of the taxonomy in attest.llm.errors.
     """
-    from pramaan.llm.errors import (ProposerMalformedOutput,
+    from attest.llm.errors import (ProposerMalformedOutput,
                                     ProposerNotConfigured,
                                     ProposerSchemaViolation, ProposerTimeout,
                                     ProposerTransportFailure)

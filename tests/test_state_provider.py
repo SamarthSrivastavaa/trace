@@ -16,18 +16,18 @@ import sys
 
 import pytest
 
-from pramaan.core.pipeline import (FAILURE_MODEL_CALL, FAILURE_MODEL_SCHEMA,
+from attest.core.pipeline import (FAILURE_MODEL_CALL, FAILURE_MODEL_SCHEMA,
                                    FAILURE_STATE_ACQUISITION, evaluate)
-from pramaan.core.verify.canonical import snapshot_hash
-from pramaan.core.verify.schema import Disposition
-from pramaan.fixtures import scenarios as fx
-from pramaan.state.contract import (AuthoritativeState, StateRequest,
+from attest.core.verify.canonical import snapshot_hash
+from attest.core.verify.schema import Disposition
+from attest.fixtures import scenarios as fx
+from attest.state.contract import (AuthoritativeState, StateRequest,
                                     StateSource, require_primitive_state)
-from pramaan.state.errors import (MalformedProviderState, ProviderFailure,
+from attest.state.errors import (MalformedProviderState, ProviderFailure,
                                   ProviderNotConfigured, StateUnavailable)
-from pramaan.state.fixture import (FixtureStateProvider, RecordingProvider,
+from attest.state.fixture import (FixtureStateProvider, RecordingProvider,
                                    SequenceProvider)
-from pramaan.storage import db
+from attest.storage import db
 
 REQ = StateRequest("m_test", "cus_test", "final_attempt")
 
@@ -250,14 +250,14 @@ def test_importing_razorpay_provider_needs_no_credentials(monkeypatch):
     monkeypatch.delenv("RAZORPAY_KEY_ID", raising=False)
     monkeypatch.delenv("RAZORPAY_KEY_SECRET", raising=False)
     import importlib
-    mod = importlib.import_module("pramaan.integrations.razorpay.provider")
+    mod = importlib.import_module("attest.integrations.razorpay.provider")
     assert mod.API_BASE.startswith("https://")
 
 
 def test_razorpay_provider_refuses_without_config(monkeypatch):
     monkeypatch.delenv("RAZORPAY_KEY_ID", raising=False)
     monkeypatch.delenv("RAZORPAY_KEY_SECRET", raising=False)
-    from pramaan.integrations.razorpay.provider import RazorpayStateProvider
+    from attest.integrations.razorpay.provider import RazorpayStateProvider
     with pytest.raises(ProviderNotConfigured):
         RazorpayStateProvider()
 
@@ -265,7 +265,7 @@ def test_razorpay_provider_refuses_without_config(monkeypatch):
 def test_razorpay_provider_refuses_live_keys(monkeypatch):
     monkeypatch.setenv("RAZORPAY_KEY_ID", "rzp_live_abc123")
     monkeypatch.setenv("RAZORPAY_KEY_SECRET", "secret")
-    from pramaan.integrations.razorpay.provider import RazorpayStateProvider
+    from attest.integrations.razorpay.provider import RazorpayStateProvider
     with pytest.raises(ProviderNotConfigured):
         RazorpayStateProvider()
 
@@ -273,7 +273,7 @@ def test_razorpay_provider_refuses_live_keys(monkeypatch):
 def test_razorpay_provider_does_not_pretend_to_be_integrated(monkeypatch):
     monkeypatch.setenv("RAZORPAY_KEY_ID", "rzp_test_abc123")
     monkeypatch.setenv("RAZORPAY_KEY_SECRET", "secret")
-    from pramaan.integrations.razorpay.provider import RazorpayStateProvider
+    from attest.integrations.razorpay.provider import RazorpayStateProvider
     p = RazorpayStateProvider()
     assert p.unresolved_mappings(), "skeleton claims a complete mapping"
     with pytest.raises(ProviderFailure):
@@ -281,7 +281,7 @@ def test_razorpay_provider_does_not_pretend_to_be_integrated(monkeypatch):
 
 
 def test_razorpay_mapper_rejects_non_primitives():
-    from pramaan.integrations.razorpay.provider import RazorpayStateProvider
+    from attest.integrations.razorpay.provider import RazorpayStateProvider
     with pytest.raises(MalformedProviderState):
         RazorpayStateProvider.to_primitive_state({"amount": 1.5})
 
@@ -304,8 +304,8 @@ def test_full_offline_import_makes_no_network_calls():
         "socket.socket.connect = _blocked\n"
         "socket.socket.connect_ex = _blocked\n"
         "socket.create_connection = _blocked\n"
-        "import pramaan.core.pipeline, pramaan.state.contract, "
-        "pramaan.state.fixture, pramaan.integrations.razorpay.provider, recheck\n"
+        "import attest.core.pipeline, attest.state.contract, "
+        "attest.state.fixture, attest.integrations.razorpay.provider, recheck\n"
         "print('ok')\n")
     out = subprocess.run([sys.executable, "-c", code], capture_output=True,
                          text=True, timeout=90)

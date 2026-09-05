@@ -8,7 +8,7 @@ WHAT THIS MODULE MAY DO
 WHAT IT MAY NOT DO
     decide anything. There is no verdict comparison, no disposition rule, no
     policy evaluation, no coverage computation and no hashing in this file.
-    Every value it returns was produced by pramaan.app.Pramaan.evaluate() or
+    Every value it returns was produced by attest.app.Attest.evaluate() or
     read back from storage. tests/test_web.py enforces this by AST.
 
 Standard library only - no FastAPI, no framework, no new dependency. A local
@@ -22,7 +22,7 @@ import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
-from ..app import Pramaan
+from ..app import Attest
 from ..config import AppConfig
 from ..state.fixture import FixtureStateProvider, RecordingProvider
 from ..storage import db
@@ -83,7 +83,7 @@ def _snapshot_state(conn, snapshot_hash):
     return json.loads(row["canonical"]) if row else None
 
 
-def serialise(result: dict, app: Pramaan, calls: dict) -> dict:
+def serialise(result: dict, app: Attest, calls: dict) -> dict:
     """Pure serialisation of what the application already returned."""
     proof = result["proof"]
     coverage = result["coverage"]
@@ -123,11 +123,11 @@ def serialise(result: dict, app: Pramaan, calls: dict) -> dict:
     }
 
 
-def run_evaluation(app: Pramaan, draft: str, merchant_id: str,
+def run_evaluation(app: Attest, draft: str, merchant_id: str,
                    customer_id: str, scenario: str, now: str | None) -> dict:
     """Invoke the REAL evaluation path and serialise the result.
 
-    Wraps Pramaan.evaluate() - the full-detail path - not process(), whose
+    Wraps Attest.evaluate() - the full-detail path - not process(), whose
     Outcome drops the coverage spans the UI needs.
     """
     provider = RecordingProvider(app.provider)
@@ -142,7 +142,7 @@ def run_evaluation(app: Pramaan, draft: str, merchant_id: str,
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "pramaan"
+    server_version = "attest"
 
     # Routes. GET is read-only; the only POSTs invoke the ordinary application
     # lifecycle (an evaluation creates a new proof) or the read-only replay.
@@ -170,7 +170,7 @@ class Handler(BaseHTTPRequestHandler):
             return {}
         return json.loads(self.rfile.read(length).decode("utf-8"))
 
-    def _app(self) -> Pramaan:
+    def _app(self) -> Attest:
         return self.server.ensure_app()
 
     # -- routes ----------------------------------------------------------
@@ -251,7 +251,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def build_server(config: AppConfig | None = None, host: str = "127.0.0.1",
-                 port: int = 8000, app: Pramaan | None = None):
+                 port: int = 8000, app: Attest | None = None):
     """Construct the server without starting it - lets tests drive it."""
     # SINGLE-THREADED on purpose. ThreadingHTTPServer hands each request to a
     # new thread, and SQLite connections are thread-bound - the alternative fix
@@ -261,9 +261,9 @@ def build_server(config: AppConfig | None = None, host: str = "127.0.0.1",
     # makes no multi-writer safety claim.
     httpd = HTTPServer((host, port), Handler)
     cfg = config or AppConfig()
-    httpd.pramaan_app = app
+    httpd.attest_app = app
 
-    def ensure_app() -> Pramaan:
+    def ensure_app() -> Attest:
         """Build the app on FIRST USE, inside the serving thread.
 
         The SQLite connection is thread-bound, so constructing it eagerly here
@@ -272,9 +272,9 @@ def build_server(config: AppConfig | None = None, host: str = "127.0.0.1",
         thread. Deferring construction keeps the connection and its user in the
         same thread without touching storage/db.py.
         """
-        if httpd.pramaan_app is None:
-            httpd.pramaan_app = Pramaan(cfg)
-        return httpd.pramaan_app
+        if httpd.attest_app is None:
+            httpd.attest_app = Attest(cfg)
+        return httpd.attest_app
 
     httpd.ensure_app = ensure_app
     return httpd
@@ -287,7 +287,7 @@ def serve(config: AppConfig | None = None, host: str = "127.0.0.1",
     print(f"MODE   {app.mode}")
     print(f"db     {app.config.db_path}")
     print(f"policy {app.policy_identity()}")
-    print(f"\nPramaan UI on http://{host}:{port}  (Ctrl-C to stop)")
+    print(f"\nAttest UI on http://{host}:{port}  (Ctrl-C to stop)")
     print("offline: no credentials read, no network calls made\n")
     try:
         httpd.serve_forever()

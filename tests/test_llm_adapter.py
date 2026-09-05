@@ -16,19 +16,19 @@ import sys
 
 import pytest
 
-from pramaan.core.pipeline import (FAILURE_MODEL_CALL, FAILURE_MODEL_SCHEMA,
+from attest.core.pipeline import (FAILURE_MODEL_CALL, FAILURE_MODEL_SCHEMA,
                                    evaluate)
-from pramaan.core.verify.schema import Disposition, Proposal
-from pramaan.fixtures import scenarios as fx
-from pramaan.llm.client import TransportResponse
-from pramaan.llm.errors import (ProposerMalformedOutput, ProposerNotConfigured,
+from attest.core.verify.schema import Disposition, Proposal
+from attest.fixtures import scenarios as fx
+from attest.llm.client import TransportResponse
+from attest.llm.errors import (ProposerMalformedOutput, ProposerNotConfigured,
                                 ProposerSchemaViolation, ProposerTimeout,
                                 ProposerTransportFailure)
-from pramaan.llm.propose import ClaudeProposer, extract_json_object, to_proposal
-from pramaan.llm.prompt import SYSTEM_PROMPT, prompt_identity
-from pramaan.state.contract import StateRequest
-from pramaan.state.fixture import FixtureStateProvider
-from pramaan.storage import db
+from attest.llm.propose import ClaudeProposer, extract_json_object, to_proposal
+from attest.llm.prompt import SYSTEM_PROMPT, prompt_identity
+from attest.state.contract import StateRequest
+from attest.state.fixture import FixtureStateProvider
+from attest.storage import db
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 NOW = "2026-09-04T10:00:00+00:00"
@@ -66,8 +66,8 @@ def conn(tmp_path):
 # --- A. no credentials required for import ---------------------------------
 
 def test_adapter_modules_import_without_credentials_or_sdk():
-    code = ("import pramaan.llm.propose, pramaan.llm.client, "
-            "pramaan.llm.prompt, pramaan.llm.errors\n"
+    code = ("import attest.llm.propose, attest.llm.client, "
+            "attest.llm.prompt, attest.llm.errors\n"
             "import sys\n"
             "assert 'anthropic' not in sys.modules, 'SDK imported eagerly'\n"
             "print('ok')\n")
@@ -81,7 +81,7 @@ def test_adapter_modules_import_without_credentials_or_sdk():
 
 def test_pipeline_does_not_import_the_anthropic_sdk():
     """core.pipeline imports the error taxonomy only - never the SDK."""
-    tree = ast.parse((ROOT / "pramaan" / "core" / "pipeline.py").read_text(encoding="utf-8"))
+    tree = ast.parse((ROOT / "attest" / "core" / "pipeline.py").read_text(encoding="utf-8"))
     mods = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
@@ -264,7 +264,7 @@ def test_failed_adapter_does_not_fall_back_to_the_mock(conn):
         mock_calls["n"] += 1
         return fx.honest_proposal()
 
-    import pramaan.fixtures.scenarios as scen
+    import attest.fixtures.scenarios as scen
     original = scen.mock_model
     scen.mock_model = counting_mock
     try:
@@ -324,7 +324,7 @@ def _code_without_docstrings(path: pathlib.Path) -> str:
 
 
 def test_adapter_contains_no_verdict_logic():
-    code = _code_without_docstrings(ROOT / "pramaan" / "llm" / "propose.py")
+    code = _code_without_docstrings(ROOT / "attest" / "llm" / "propose.py")
     for forbidden in ("SUPPORTED", "CONTRADICTED", "UNVERIFIABLE",
                       "Disposition", "adjudicate", "coverage", "Status"):
         assert forbidden not in code, f"propose.py CODE references {forbidden}"
@@ -333,7 +333,7 @@ def test_adapter_contains_no_verdict_logic():
 def test_adapter_imports_no_verdict_machinery():
     """Structural companion to the scan above: the adapter may import the
     production Proposal schema, and nothing that computes a verdict."""
-    tree = ast.parse((ROOT / "pramaan" / "llm" / "propose.py").read_text(encoding="utf-8"))
+    tree = ast.parse((ROOT / "attest" / "llm" / "propose.py").read_text(encoding="utf-8"))
     imported = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom) and node.module:
@@ -344,8 +344,8 @@ def test_adapter_imports_no_verdict_machinery():
 # --- H. gate invariants hold against the REAL adapter ----------------------
 
 def test_gated_requests_never_reach_the_real_adapter(conn):
-    from pramaan.policy.gate import COOLDOWN, SUPPRESSED
-    from pramaan.delivery import SimulatedSender, deliver_and_commit
+    from attest.policy.gate import COOLDOWN, SUPPRESSED
+    from attest.delivery import SimulatedSender, deliver_and_commit
 
     db.suppress(conn, "m", "gone", NOW, "test")
     t1 = FakeTransport(honest_json())
@@ -371,7 +371,7 @@ def test_gated_requests_never_reach_the_real_adapter(conn):
 def test_attempt_cap_acquires_state_but_never_calls_the_real_adapter(conn):
     import copy
 
-    from pramaan.state.contract import AuthoritativeState, StateSource
+    from attest.state.contract import AuthoritativeState, StateSource
 
     over = fx.state_final_attempt()
     over["subscription"]["attempt_index"] = 5
@@ -396,7 +396,7 @@ def test_attempt_cap_acquires_state_but_never_calls_the_real_adapter(conn):
 # --- I. one acquisition survives -------------------------------------------
 
 def test_adapter_does_not_trigger_a_second_acquisition(conn):
-    from pramaan.state.fixture import RecordingProvider
+    from attest.state.fixture import RecordingProvider
     p = RecordingProvider(FixtureStateProvider())
     evaluate(fx.DRAFT, REQ, p, ClaudeProposer(transport=FakeTransport(honest_json())),
              conn, now=NOW)
@@ -422,7 +422,7 @@ def test_request_params_omit_sampling_and_thinking_budget(monkeypatch):
     """claude-opus-5 rejects temperature/top_p/top_k and budget_tokens with a
     400. This is why killtest/run_arms.py stopped sending temperature."""
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
-    from pramaan.llm.client import AnthropicTransport
+    from attest.llm.client import AnthropicTransport
     params = AnthropicTransport().request_params("sys", "usr")
     assert params["model"] == "claude-opus-5"
     for banned in ("temperature", "top_p", "top_k", "thinking"):

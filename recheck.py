@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Offline re-verification. No model. No network.
 
-    python recheck.py --db pramaan.db --proof prf_abc123
-    python recheck.py --db pramaan.db --all
+    python recheck.py --db attest.db --proof prf_abc123
+    python recheck.py --db attest.db --all
 
 This RECOMPUTES the decision from the stored snapshot and stored claims. It
 does not replay a stored verdict - replaying the answer would prove nothing.
@@ -24,16 +24,16 @@ import json
 import re
 import sys
 
-from pramaan.core.pipeline import decide
-from pramaan.policy.gate import evaluate_pre_state
-from pramaan.policy.loader import (load_default_policy, parse_policy,
+from attest.core.pipeline import decide
+from attest.policy.gate import evaluate_pre_state
+from attest.policy.loader import (load_default_policy, parse_policy,
                                    policy_hash)
-from pramaan.policy.schema import GateContext
-from pramaan.core.verify import coverage as cov
-from pramaan.core.verify.canonical import content_hash, snapshot_hash
-from pramaan.core.verify.rules import adjudicate_all
-from pramaan.core.verify.schema import ProposedClaim, Status
-from pramaan.storage import db
+from attest.policy.schema import GateContext
+from attest.core.verify import coverage as cov
+from attest.core.verify.canonical import content_hash, snapshot_hash
+from attest.core.verify.rules import adjudicate_all
+from attest.core.verify.schema import ProposedClaim, Status
+from attest.storage import db
 
 _OFFSET_ISO = re.compile(
     r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$")
@@ -136,7 +136,7 @@ def recheck_one(conn, proof_id: str, allow_policy_drift: bool = False) -> tuple[
 def check_send_log(conn) -> tuple[bool, list[str]]:
     """Verify the STRUCTURAL integrity of recorded successful-send facts.
 
-    This does NOT prove a transport delivered anything - Pramaan never observes
+    This does NOT prove a transport delivered anything - Attest never observes
     the transport. It proves the recorded internal lifecycle is consistent:
 
       - every send references a proof that exists
@@ -170,7 +170,7 @@ def check_send_log(conn) -> tuple[bool, list[str]]:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--db", default="pramaan.db")
+    ap.add_argument("--db", default="attest.db")
     ap.add_argument("--proof")
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--allow-policy-drift", action="store_true")

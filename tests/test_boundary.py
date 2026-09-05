@@ -15,7 +15,7 @@ import sqlite3
 
 import pytest
 
-VERIFY = pathlib.Path(__file__).resolve().parents[1] / "pramaan" / "core" / "verify"
+VERIFY = pathlib.Path(__file__).resolve().parents[1] / "attest" / "core" / "verify"
 
 ALLOWED_TOP_LEVEL = {
     "re", "unicodedata", "dataclasses", "datetime", "decimal", "enum",
@@ -62,10 +62,10 @@ def test_verify_has_no_dynamic_execution(path):
 
 def test_adjudicator_runs_with_io_disabled(monkeypatch):
     """The guarantee static analysis cannot give: no I/O at runtime."""
-    from pramaan.core.verify import coverage as cov
-    from pramaan.core.verify.rules import adjudicate_all
-    from pramaan.core.verify.schema import ProposedClaim
-    from pramaan.fixtures import scenarios as fx
+    from attest.core.verify import coverage as cov
+    from attest.core.verify.rules import adjudicate_all
+    from attest.core.verify.schema import ProposedClaim
+    from attest.fixtures import scenarios as fx
 
     def boom(*a, **k):
         raise AssertionError("trust boundary attempted I/O")

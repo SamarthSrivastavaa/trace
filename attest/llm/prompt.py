@@ -3,7 +3,7 @@
 The prompt is NOT a verification engine. It carries no policy rules, no
 cooldown, no suppression, no attempt caps, and no notion of SEND/BLOCK/
 ESCALATE. Its only job is to turn prose into typed claims; every verdict is
-computed afterwards by pramaan.core.verify.rules.
+computed afterwards by attest.core.verify.rules.
 
 Where the closed schema can express a constraint, the schema carries it - an
 invented field name fails to parse, so the prompt does not need to plead for

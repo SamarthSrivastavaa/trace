@@ -21,23 +21,23 @@ import sqlite3
 
 import pytest
 
-from pramaan.core.pipeline import build_gate_context, evaluate
-from pramaan.core.verify.schema import Disposition
-from pramaan.fixtures import scenarios as fx
-from pramaan.policy.gate import (ATTEMPT_CAP, BAD_TIMESTAMP, COOLDOWN,
+from attest.core.pipeline import build_gate_context, evaluate
+from attest.core.verify.schema import Disposition
+from attest.fixtures import scenarios as fx
+from attest.policy.gate import (ATTEMPT_CAP, BAD_TIMESTAMP, COOLDOWN,
                                  SUPPRESSED, evaluate_post_state,
                                  evaluate_pre_state)
-from pramaan.policy.loader import (load_default_policy, parse_policy,
+from attest.policy.loader import (load_default_policy, parse_policy,
                                    policy_hash)
-from pramaan.policy.schema import GateContext, GateDecision
-from pramaan.state.contract import StateRequest
-from pramaan.state.fixture import FixtureStateProvider, SequenceProvider
-from pramaan.storage import db
+from attest.policy.schema import GateContext, GateDecision
+from attest.state.contract import StateRequest
+from attest.state.fixture import FixtureStateProvider, SequenceProvider
+from attest.storage import db
 
 NOW = "2026-09-04T10:00:00+00:00"
 POLICY = load_default_policy()
 RAW = json.loads(
-    (pathlib.Path("pramaan/policy/default_policy.json")).read_text(encoding="utf-8"))
+    (pathlib.Path("attest/policy/default_policy.json")).read_text(encoding="utf-8"))
 
 
 class CallLog:
@@ -207,7 +207,7 @@ def test_cooldown_blocked_request_touches_neither(conn):
     """Cooldown is seeded through the REAL lifecycle - evaluate, then commit a
     successful send. Phase 6 removed the raw record_send() backdoor, so this
     test now exercises the production path rather than a fixture insert."""
-    from pramaan.delivery import SimulatedSender, deliver_and_commit
+    from attest.delivery import SimulatedSender, deliver_and_commit
     log = CallLog()
     seed = evaluate(fx.DRAFT, StateRequest("m", "recent", "final_attempt"),
                     FixtureStateProvider(), fx.mock_model, conn,
@@ -239,7 +239,7 @@ def test_attempt_cap_acquires_state_but_never_calls_the_model(conn):
         name = "overcap"
 
         def get_state(self, request):
-            from pramaan.state.contract import (AuthoritativeState, StateSource)
+            from attest.state.contract import (AuthoritativeState, StateSource)
             log.sequence.append("provider")
             self.calls = getattr(self, "calls", 0) + 1
             return AuthoritativeState(state=copy.deepcopy(over),
@@ -279,7 +279,7 @@ def test_no_refetch_invariant_still_holds(conn):
 
 
 def test_state_acquisition_failure_never_reaches_the_model(conn):
-    from pramaan.state.errors import ProviderFailure
+    from attest.state.errors import ProviderFailure
     log = CallLog()
 
     class Broken:
@@ -299,7 +299,7 @@ def test_state_acquisition_failure_never_reaches_the_model(conn):
 
 
 def test_gate_denial_is_distinguishable_from_model_and_provider_failure(conn):
-    from pramaan.state.errors import ProviderFailure
+    from attest.state.errors import ProviderFailure
 
     class Broken:
         name = "broken"
@@ -413,8 +413,8 @@ def test_replay_detects_tampered_policy_artifact(tmp_path):
 
 # --- boundary purity --------------------------------------------------------
 
-@pytest.mark.parametrize("mod", ["pramaan/policy/gate.py",
-                                 "pramaan/policy/schema.py"])
+@pytest.mark.parametrize("mod", ["attest/policy/gate.py",
+                                 "attest/policy/schema.py"])
 def test_policy_decision_modules_are_pure(mod):
     tree = ast.parse(pathlib.Path(mod).read_text(encoding="utf-8"))
     banned = {"socket", "sqlite3", "requests", "httpx", "anthropic", "os",
@@ -432,7 +432,7 @@ def test_policy_decision_modules_are_pure(mod):
 
 
 def test_gate_module_reads_no_clock():
-    src = pathlib.Path("pramaan/policy/gate.py").read_text(encoding="utf-8")
+    src = pathlib.Path("attest/policy/gate.py").read_text(encoding="utf-8")
     assert "datetime.now" not in src and "time.time" not in src
 
 

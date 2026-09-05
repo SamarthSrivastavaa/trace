@@ -13,16 +13,16 @@ import sqlite3
 
 import pytest
 
-from pramaan.core.pipeline import evaluate
-from pramaan.core.verify.schema import Disposition
-from pramaan.delivery import (SimulatedSender, commit_successful_send,
+from attest.core.pipeline import evaluate
+from attest.core.verify.schema import Disposition
+from attest.delivery import (SimulatedSender, commit_successful_send,
                               deliver_and_commit)
-from pramaan.fixtures import scenarios as fx
-from pramaan.policy.gate import COOLDOWN
-from pramaan.policy.loader import load_default_policy
-from pramaan.state.contract import StateRequest
-from pramaan.state.fixture import FixtureStateProvider
-from pramaan.storage import db
+from attest.fixtures import scenarios as fx
+from attest.policy.gate import COOLDOWN
+from attest.policy.loader import load_default_policy
+from attest.state.contract import StateRequest
+from attest.state.fixture import FixtureStateProvider
+from attest.storage import db
 from recheck import check_send_log
 
 POLICY = load_default_policy()

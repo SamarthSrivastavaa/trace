@@ -70,7 +70,7 @@ def build_gate_context(request: StateRequest, now: str, conn=None) -> GateContex
     """Read the local facts the pre-state gate needs.
 
     Database I/O happens HERE, in the coordination layer - never inside the
-    pure decision function. These are Pramaan's own records, so reading them
+    pure decision function. These are Attest's own records, so reading them
     costs no provider call, which is what makes the zero-acquisition guarantee
     achievable at all.
     """

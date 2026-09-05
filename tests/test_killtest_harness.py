@@ -2,7 +2,7 @@
 
 Two things are defended here:
 
-  1. EQUIVALENCE - the B3 arm is the shipped Pramaan path, not a harness-local
+  1. EQUIVALENCE - the B3 arm is the shipped Attest path, not a harness-local
      lookalike. Measuring a variant would produce a number about a system that
      does not exist.
   2. ACCOUNTING - instrumentation observes and never influences. A recorded
@@ -24,12 +24,12 @@ sys.path.insert(0, str(ROOT / "killtest"))
 import run_arms                                          # noqa: E402
 from instrument import (CallRecord, Ledger, RecordingTransport,   # noqa: E402
                         classify, summarise)
-from pramaan.llm.client import MAX_TOKENS, MODEL, TransportResponse  # noqa: E402
-from pramaan.llm.errors import (ProposerMalformedOutput,          # noqa: E402
+from attest.llm.client import MAX_TOKENS, MODEL, TransportResponse  # noqa: E402
+from attest.llm.errors import (ProposerMalformedOutput,          # noqa: E402
                                 ProposerNotConfigured,
                                 ProposerSchemaViolation, ProposerTimeout,
                                 ProposerTransportFailure)
-from pramaan.llm.prompt import SYSTEM_PROMPT, prompt_identity     # noqa: E402
+from attest.llm.prompt import SYSTEM_PROMPT, prompt_identity     # noqa: E402
 
 
 # --- B. equivalence proof ---------------------------------------------------
@@ -37,8 +37,8 @@ from pramaan.llm.prompt import SYSTEM_PROMPT, prompt_identity     # noqa: E402
 def test_b3_gate_passes_and_reports_production_identity():
     ident = run_arms.assert_b3_is_production()
     assert ident["prompt_identity"] == prompt_identity()
-    assert ident["proposer"] == "pramaan.llm.propose.ClaudeProposer"
-    assert ident["extractor"] == "pramaan.llm.propose.extract_json_object"
+    assert ident["proposer"] == "attest.llm.propose.ClaudeProposer"
+    assert ident["extractor"] == "attest.llm.propose.extract_json_object"
 
 
 def test_harness_has_no_local_b3_prompt():
@@ -49,7 +49,7 @@ def test_harness_has_no_local_b3_prompt():
 
 def test_b3_prompt_is_the_production_prompt_object():
     """Identity, not equality - a copied string would drift silently."""
-    from pramaan.llm import propose as prod
+    from attest.llm import propose as prod
     assert prod.SYSTEM_PROMPT is SYSTEM_PROMPT
 
 
@@ -69,13 +69,13 @@ def test_b3_adjudicates_with_production_rules():
     import inspect
     src = inspect.getsource(run_arms.b3_label)
     assert "adjudicate_all" in src
-    assert run_arms.adjudicate_all.__module__ == "pramaan.core.verify.rules"
-    assert run_arms.Proposal.__module__ == "pramaan.core.verify.schema"
+    assert run_arms.adjudicate_all.__module__ == "attest.core.verify.rules"
+    assert run_arms.Proposal.__module__ == "attest.core.verify.schema"
 
 
 def test_b3_gate_fails_if_the_prompt_drifts(monkeypatch):
     """The assertion must actually bite."""
-    from pramaan.llm import propose as prod
+    from attest.llm import propose as prod
     monkeypatch.setattr(prod, "SYSTEM_PROMPT", "a different prompt")
     with pytest.raises(AssertionError):
         run_arms.assert_b3_is_production()

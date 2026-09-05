@@ -10,12 +10,12 @@ import sqlite3
 
 import pytest
 
-from pramaan.core.pipeline import evaluate
-from pramaan.core.verify.schema import Disposition, Status
-from pramaan.fixtures import scenarios as fx
-from pramaan.state.contract import StateRequest
-from pramaan.state.fixture import FixtureStateProvider
-from pramaan.storage import db
+from attest.core.pipeline import evaluate
+from attest.core.verify.schema import Disposition, Status
+from attest.fixtures import scenarios as fx
+from attest.state.contract import StateRequest
+from attest.state.fixture import FixtureStateProvider
+from attest.storage import db
 from recheck import recheck_one
 
 PROVIDER = FixtureStateProvider()

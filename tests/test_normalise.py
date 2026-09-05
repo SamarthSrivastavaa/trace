@@ -7,8 +7,8 @@ silently. Verified before the fix: PERCENT at offset 12 in NFD, 11 in NFC.
 
 import pytest
 
-from pramaan.core.verify.coverage import find_spans
-from pramaan.core.verify.normalise import (NotNormalised, is_normalised,
+from attest.core.verify.coverage import find_spans
+from attest.core.verify.normalise import (NotNormalised, is_normalised,
                                            normalise, require_normalised)
 
 NFD = "Café - get 40% off within 24 hours"      # e + combining acute

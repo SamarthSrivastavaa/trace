@@ -1,6 +1,6 @@
 # FAILURES
 
-What actually went wrong while building Pramaan.
+What actually went wrong while building Attest.
 
 Every entry below happened. Nothing here is invented to look rigorous, and
 nothing has been rewritten to make an earlier decision look smarter than it
@@ -132,10 +132,10 @@ state-aware is **structurally incapable** of separating the other two.
 
 **What changed.** Two pipeline stages were deleted, along with a hash chain and
 an entire evidence-path validation layer. The claim was re-specified: the
-difference between "LLM with state" and Pramaan is not intelligence, it is the
+difference between "LLM with state" and Attest is not intelligence, it is the
 **output contract** — a prose verdict is an assertion; a typed claim with an
 evidence pointer is recomputable. Require the baseline to emit typed findings
-and it *becomes* Pramaan.
+and it *becomes* Attest.
 
 **Conclusion.** The accuracy claim was dropped before any measurement existed
 to support it.
@@ -144,7 +144,7 @@ to support it.
 
 ## 6. "Reproducible" was two different claims, and one of them was false
 
-**Assumption.** Pramaan is reproducible.
+**Assumption.** Attest is reproducible.
 
 **Test.** Asked what exactly reproduces.
 
@@ -157,7 +157,7 @@ to support it.
 
 **What was wrong.** Earlier documents compared "the baseline's verdicts are
 unstable across repeats" against "the validator's re-derivation is
-bit-identical". That pits the baseline's end-to-end variance against Pramaan's
+bit-identical". That pits the baseline's end-to-end variance against Attest's
 *replay* determinism. Unfair, and withdrawn.
 
 **What changed.** The claim was narrowed to audit determinism everywhere,
@@ -353,7 +353,7 @@ adversarial schema test, fixed with an explicit `type(v) is bool` guard —
 `isinstance` is useless here.
 
 **`status` crashed instead of reporting.** Selecting the live proposer without
-credentials made `Pramaan.__init__` construct it eagerly and raise, so the one
+credentials made `Attest.__init__` construct it eagerly and raise, so the one
 command whose job is to say *"you are missing a credential"* died before
 printing. Components now build lazily.
 

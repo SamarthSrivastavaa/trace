@@ -9,9 +9,9 @@ from decimal import Decimal
 
 import pytest
 
-from pramaan.core.verify.rules import NonPrimitiveValue, adjudicate, _require_primitive
-from pramaan.core.verify.schema import ClaimKind, ProposedClaim, Status
-from pramaan.fixtures import scenarios as fx
+from attest.core.verify.rules import NonPrimitiveValue, adjudicate, _require_primitive
+from attest.core.verify.schema import ClaimKind, ProposedClaim, Status
+from attest.fixtures import scenarios as fx
 
 
 def claim(kind, asserted, evidence=None, cid="c1"):

@@ -36,7 +36,7 @@ class ProposerChoice(str, Enum):
     CLAUDE = "claude"            # LIVE, credentials required
 
 
-DEFAULT_DB = "pramaan.db"
+DEFAULT_DB = "attest.db"
 
 
 @dataclass(frozen=True)
@@ -75,7 +75,7 @@ class AppConfig:
     def from_env(cls, **overrides) -> "AppConfig":
         """Read selectors from the environment. Reads no secret."""
         def pick(enum_cls, env_name, default):
-            raw = overrides.pop(env_name.lower().replace("pramaan_", ""), None)
+            raw = overrides.pop(env_name.lower().replace("attest_", ""), None)
             raw = raw or os.environ.get(env_name)
             if raw is None:
                 return default
@@ -87,11 +87,11 @@ class AppConfig:
                 raise ConfigError(
                     f"{env_name}={raw!r} is not one of {valid}") from None
 
-        state = pick(StateProviderChoice, "PRAMAAN_STATE_PROVIDER",
+        state = pick(StateProviderChoice, "ATTEST_STATE_PROVIDER",
                      StateProviderChoice.FIXTURE)
-        proposer = pick(ProposerChoice, "PRAMAAN_PROPOSER", ProposerChoice.FIXTURE)
-        db = overrides.pop("db_path", None) or os.environ.get("PRAMAAN_DB", DEFAULT_DB)
-        policy = overrides.pop("policy_path", None) or os.environ.get("PRAMAAN_POLICY")
+        proposer = pick(ProposerChoice, "ATTEST_PROPOSER", ProposerChoice.FIXTURE)
+        db = overrides.pop("db_path", None) or os.environ.get("ATTEST_DB", DEFAULT_DB)
+        policy = overrides.pop("policy_path", None) or os.environ.get("ATTEST_POLICY")
 
         if overrides:
             raise ConfigError(f"unknown config override(s): {sorted(overrides)}")
