@@ -99,8 +99,22 @@ def test_claimed_per_area_test_counts_are_plausible():
     """Every module named in the README's test table must exist."""
     for area in ("test_repo_integrity", "test_llm_adapter", "test_storage",
                  "test_gate", "test_app_cli", "test_killtest_harness",
-                 "test_policy", "test_state_provider"):
+                 "test_policy", "test_state_provider", "test_web", "test_docs"):
         assert (ROOT / "tests" / f"{area}.py").is_file(), area
+
+
+def test_readme_test_table_sums_to_the_real_total():
+    """The table shipped stale once: it summed to an older baseline while the
+    headline number had moved on. Checking only that the module files exist
+    could not catch that, so the arithmetic is now checked too."""
+    r = run(sys.executable, "-m", "pytest", "tests/", "-q", "--collect-only")
+    actual = int(re.search(r"(\d+) tests collected", r.stdout).group(1))
+    table = re.search(r"\| Area \| Tests \|\n\|[-| ]+\|\n((?:\|.*\|\n)+)", README)
+    assert table, "README has no test table"
+    rows = re.findall(r"\|\s*[^|]+\|\s*(\d+)\s*\|", table.group(1))
+    assert rows, "test table has no counts"
+    assert sum(int(n) for n in rows) == actual, \
+        f"README table sums to {sum(int(n) for n in rows)}, repository has {actual}"
 
 
 # --- every command in the README actually runs -----------------------------
@@ -191,6 +205,19 @@ def test_readme_does_not_claim_a_live_integration():
 def test_readme_says_the_kill_test_has_not_been_run():
     assert "has not been run" in README
     assert "no accuracy result" in README.lower()
+
+
+def test_razorpay_unresolved_count_matches_the_code():
+    """Every doc claimed "8 of 12" while the mapping held 9 TODOs. The error
+    understated the limitation, so nothing complained. It is pinned now."""
+    from pramaan.integrations.razorpay.provider import REQUIRED_RESOURCE_MAPPING
+    todo = [k for k, v in REQUIRED_RESOURCE_MAPPING.items() if v.startswith("TODO")]
+    claim = f"{len(todo)} of {len(REQUIRED_RESOURCE_MAPPING)}"
+    from pramaan.web.server import LIMITATIONS
+    served = " ".join(LIMITATIONS["not_proven"])
+    for name, doc in (("README", README), ("RUNBOOK", RUNBOOK),
+                      ("SCRIPT", SCRIPT), ("LIMITATIONS", served)):
+        assert claim in doc, f"{name} does not state the real count {claim!r}"
 
 
 def test_readme_marks_razorpay_as_a_skeleton():

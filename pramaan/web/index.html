@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pramaan — proof before send</title>
+<style>
+  :root{
+    --bg:#0A0E13; --panel:#121821; --panel2:#0E141B; --line:#1E2833;
+    --ink:#CBD5E0; --dim:#7C8B9C; --faint:#4A5765;
+    --send:#3FB950; --block:#F85149; --escalate:#D29922;
+    --steel:#7FA8C9; --brass:#D0A54A;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:14px/1.55 ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif}
+  code,.mono{font-family:ui-monospace,"SF Mono",Consolas,"Liberation Mono",monospace}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 22px 70px}
+  a{color:var(--steel)}
+
+  /* ---------- top bar ---------- */
+  .top{display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+    padding:16px 0;border-bottom:1px solid var(--line)}
+  .brand{font-size:19px;font-weight:700;letter-spacing:.16em}
+  .brand span{color:var(--brass)}
+  .tag{color:var(--dim);font-size:13px}
+  .badges{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .badge{font-family:ui-monospace,monospace;font-size:10.5px;letter-spacing:.09em;
+    padding:4px 9px;border:1px solid var(--line);border-radius:3px;color:var(--dim)}
+  .badge b{color:var(--escalate);font-weight:600}
+
+  /* ---------- hero ---------- */
+  .hero{padding:34px 0 10px;border-bottom:1px solid var(--line)}
+  .hero h1{margin:0 0 12px;font-size:26px;line-height:1.28;font-weight:600;
+    max-width:33ch;letter-spacing:-.01em}
+  .hero h1 em{font-style:normal;color:var(--brass)}
+  .hero p{margin:0;color:var(--dim);max-width:66ch}
+  .pipe{display:flex;gap:6px;flex-wrap:wrap;margin-top:22px}
+  .pipe div{font-family:ui-monospace,monospace;font-size:10.5px;letter-spacing:.06em;
+    padding:6px 10px;border:1px solid var(--line);border-radius:3px;color:var(--faint)}
+  .pipe div.on{color:var(--ink);border-color:var(--steel)}
+  .pipe div.det{border-left:2px solid var(--brass)}
+
+  /* ---------- layout ---------- */
+  h2{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);
+    margin:34px 0 12px;font-weight:600}
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+  @media(max-width:960px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:16px 18px}
+  .card h3{margin:0 0 4px;font-size:12px;letter-spacing:.11em;text-transform:uppercase;
+    color:var(--dim);font-weight:600}
+  .card .sub{color:var(--faint);font-size:12px;margin:0 0 12px}
+
+  textarea{width:100%;min-height:74px;background:var(--panel2);color:var(--ink);
+    border:1px solid var(--line);border-radius:4px;padding:11px;resize:vertical;
+    font-family:ui-monospace,monospace;font-size:13px;line-height:1.6}
+  select,button{font:inherit}
+  select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);
+    border-radius:4px;padding:8px 10px;font-family:ui-monospace,monospace;font-size:12.5px}
+  button{background:var(--brass);color:#151008;border:0;border-radius:4px;
+    padding:9px 18px;font-weight:600;cursor:pointer;letter-spacing:.02em}
+  button:hover{filter:brightness(1.1)}
+  button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  button:disabled{opacity:.45;cursor:default}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+
+  /* ---------- draft with backend spans ---------- */
+  .draft{font-family:ui-monospace,monospace;font-size:14px;line-height:2.05;
+    background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:13px}
+  mark{background:transparent;color:var(--ink);border-bottom:2px solid var(--brass);
+    padding-bottom:1px}
+  mark.un{border-bottom-color:var(--block);background:rgba(248,81,73,.09)}
+
+  pre{margin:0;background:var(--panel2);border:1px solid var(--line);border-radius:4px;
+    padding:12px;overflow:auto;font-size:12px;line-height:1.6;color:var(--dim);max-height:290px}
+
+  /* ---------- verdict table ---------- */
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th{text-align:left;font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--faint);font-weight:600;
+    padding:7px 9px;border-bottom:1px solid var(--line)}
+  td{padding:9px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:0}
+  .col-claim{border-right:1px solid var(--line)}
+  .col-state{border-right:1px solid var(--line)}
+  .st{font-family:ui-monospace,monospace;font-size:10.5px;letter-spacing:.07em;
+    padding:2px 7px;border-radius:3px;white-space:nowrap}
+  .st.SUPPORTED{background:rgba(63,185,80,.14);color:var(--send)}
+  .st.CONTRADICTED{background:rgba(248,81,73,.14);color:var(--block)}
+  .st.UNVERIFIABLE{background:rgba(210,153,34,.14);color:var(--escalate)}
+  .st.MALFORMED{background:rgba(248,81,73,.14);color:var(--block)}
+  .why{color:var(--faint);font-family:ui-monospace,monospace;font-size:11px}
+
+  /* ---------- disposition ---------- */
+  .disp{display:flex;align-items:center;gap:16px;padding:16px 18px;border-radius:5px;
+    border:1px solid var(--line);background:var(--panel)}
+  .disp .v{font-size:30px;font-weight:700;letter-spacing:.04em;line-height:1}
+  .disp.SEND{border-color:rgba(63,185,80,.45)} .disp.SEND .v{color:var(--send)}
+  .disp.BLOCK{border-color:rgba(248,81,73,.45)} .disp.BLOCK .v{color:var(--block)}
+  .disp.ESCALATE{border-color:rgba(210,153,34,.45)} .disp.ESCALATE .v{color:var(--escalate)}
+  .disp .m{color:var(--dim);font-size:12.5px}
+  .disp .m b{color:var(--ink);font-weight:600}
+
+  /* ---------- flip ---------- */
+  .flip{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:960px){.flip{grid-template-columns:1fr}}
+  .same{margin:12px 0 0;padding:11px 14px;border:1px dashed var(--line);border-radius:4px;
+    color:var(--dim);font-size:12.5px}
+  .same b{color:var(--brass)}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-family:ui-monospace,monospace;
+    font-size:12px}
+  .kv dt{color:var(--faint)} .kv dd{margin:0;color:var(--ink);word-break:break-all}
+  .kv dd.diff{color:var(--brass);font-weight:600}
+
+  .lim{border:1px solid rgba(210,153,34,.4);background:rgba(210,153,34,.05);
+    border-radius:5px;padding:16px 18px}
+  .lim h3{color:var(--escalate)}
+  .lim ul{margin:8px 0 0;padding-left:18px;color:var(--dim)}
+  .lim li{margin-bottom:5px}
+  .note{color:var(--faint);font-size:12px;margin-top:9px}
+  .err{color:var(--block);font-family:ui-monospace,monospace;font-size:12px}
+  .spin{color:var(--dim);font-size:12.5px}
+  footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+    color:var(--faint);font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="brand">PRAMAAN<span>.</span></div>
+    <div class="tag">Proof before send.</div>
+    <div class="badges">
+      <div class="badge">MODEL <b id="b-model">—</b></div>
+      <div class="badge">STATE <b id="b-state">—</b></div>
+      <div class="badge" id="b-policy">POLICY —</div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <h1>An AI wrote this message. <em>It cannot prove its own facts.</em></h1>
+    <p>Pramaan freezes the merchant's authoritative state, lets the model propose only
+       <em>what the message claims</em>, then deterministic code checks each claim against
+       the evidence and decides. The model never decides whether a claim is true.</p>
+    <div class="pipe">
+      <div>DRAFT</div><div class="det">GATE</div><div class="det">FREEZE STATE</div>
+      <div>PROPOSE CLAIMS</div><div class="det">VERIFY EVIDENCE</div>
+      <div class="det">COVERAGE</div><div class="det">DECIDE</div><div class="det">PROOF</div>
+    </div>
+    <p class="note">Boxes with a gold edge are deterministic code. Only
+       <b>PROPOSE CLAIMS</b> involves a model &mdash; and in this demo that is a mock.</p>
+  </div>
+
+  <h2>Verification workspace</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>Draft message</h3>
+      <p class="sub">What the AI agent wants to send.</p>
+      <textarea id="draft">This is our final attempt. Your 15% offer expires in 24 hours.</textarea>
+      <div class="row">
+        <select id="scenario">
+          <option value="final_attempt">state: attempt_index = 4 of 4</option>
+          <option value="first_attempt">state: attempt_index = 1 of 4</option>
+        </select>
+        <button id="go">Verify</button>
+        <span id="status" class="spin"></span>
+      </div>
+      <div class="row"><span class="note" id="calls"></span></div>
+    </div>
+
+    <div class="card">
+      <h3>Authoritative state <span class="badge">SIMULATED</span></h3>
+      <p class="sub">The exact snapshot recorded for this evaluation, read back from
+         storage &mdash; not re-fetched to draw this panel.</p>
+      <pre id="state">Run a verification to load the recorded snapshot.</pre>
+    </div>
+  </div>
+
+  <div id="result" style="display:none">
+    <h2>Disposition</h2>
+    <div class="disp" id="disp">
+      <div class="v" id="disp-v">—</div>
+      <div class="m" id="disp-m"></div>
+    </div>
+
+    <h2>Claim → evidence → verdict</h2>
+    <div class="card">
+      <p class="sub">Left is what the message asserts. Middle is what authoritative state
+         actually holds. Right is the deterministic verdict. The browser renders these
+         values; it computes none of them.</p>
+      <div class="draft" id="marked"></div>
+      <table style="margin-top:14px">
+        <thead><tr>
+          <th class="col-claim">What the message claims</th>
+          <th class="col-state">What authoritative state says</th>
+          <th>Deterministic verdict</th>
+        </tr></thead>
+        <tbody id="verdicts"></tbody>
+      </table>
+    </div>
+
+    <h2>Coverage &mdash; did the model quietly skip something?</h2>
+    <div class="card">
+      <p class="sub">A separate pass lexes the draft independently of the proposal. If a
+         numeric or temporal span has no adjudicated claim behind it, the message is
+         blocked &mdash; a model forgetting to check a claim does not make the claim
+         disappear.</p>
+      <div id="cov-sum"></div>
+      <table style="margin-top:10px">
+        <thead><tr><th>Span</th><th>Kind</th><th>Offsets</th><th>Covered by</th></tr></thead>
+        <tbody id="cov"></tbody>
+      </table>
+    </div>
+
+    <h2>Proof &amp; replay</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Append-only proof</h3>
+        <p class="sub">UPDATE and DELETE are refused by database triggers.
+           That is not file-level tamper resistance, and we do not claim it.</p>
+        <dl class="kv" id="proof"></dl>
+        <div class="row">
+          <button class="ghost" id="raw">Raw proof</button>
+          <button class="ghost" id="replay">Replay offline</button>
+        </div>
+        <pre id="rawout" style="display:none;margin-top:12px"></pre>
+      </div>
+      <div class="card">
+        <h3>Offline replay</h3>
+        <p class="sub">Replay does not re-ask the model. It recomputes the decision from
+           the recorded policy and snapshot, then compares. No network call.</p>
+        <div id="replayout" class="spin">Not run yet.</div>
+        <p class="note">To see tamper detection, run this in a terminal, then press
+           <b>Replay offline</b> again:<br>
+           <code>python scripts/tamper_demo.py &lt;your db&gt;</code><br>
+           There is deliberately no tamper endpoint &mdash; the attack lives in a script,
+           outside the package.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2>The signature demonstration &mdash; one field, opposite outcome</h2>
+  <div class="card">
+    <p class="sub">Two real evaluations through the same API. The message is byte-identical.
+       Only <code>subscription.attempt_index</code> differs.</p>
+    <div class="row"><button id="flip">Run both scenarios</button>
+      <span id="flipstatus" class="spin"></span></div>
+    <div class="same" id="samemsg" style="display:none"></div>
+    <div class="flip" style="margin-top:14px">
+      <div class="card" id="A" style="display:none"></div>
+      <div class="card" id="B" style="display:none"></div>
+    </div>
+  </div>
+
+  <h2>What this does not prove</h2>
+  <div class="lim">
+    <h3>Honest limitations</h3>
+    <p class="sub" id="lim-mode"></p>
+    <ul id="lim"></ul>
+  </div>
+
+  <footer>
+    Every value on this page was produced by <code>pramaan.app.Pramaan.evaluate()</code> or
+    read back from storage. This page contains no verdict, disposition, policy or coverage
+    logic &mdash; <code>tests/test_web.py</code> enforces that by AST inspection.
+  </footer>
+</div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = t => String(t).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const val = v => v == null ? "—" : (typeof v === "object" ? esc(JSON.stringify(v.value ?? v)) : esc(v));
+
+async function api(path, body){
+  const r = await fetch(path, body ? {method:"POST", headers:{"Content-Type":"application/json"},
+                                     body:JSON.stringify(body)} : {});
+  const j = await r.json();
+  if (j.error) throw new Error(j.error);
+  return j;
+}
+
+/* Render the draft with spans the BACKEND returned. No claim detection here. */
+function marked(text, spans){
+  const pts = spans.slice().sort((a,b)=>a.start-b.start);
+  let out = "", at = 0;
+  for (const s of pts){
+    if (s.start < at) continue;
+    out += esc(text.slice(at, s.start));
+    out += `<mark class="${s.covered_by ? "" : "un"}" title="${esc(s.kind)}${
+      s.covered_by ? " · covered by " + esc(s.covered_by) : " · NOT adjudicated"}">${
+      esc(text.slice(s.start, s.end))}</mark>`;
+    at = s.end;
+  }
+  return out + esc(text.slice(at));
+}
+
+function render(d){
+  $("#result").style.display = "";
+  $("#b-model").textContent = d.mode.model;
+  $("#b-state").textContent = d.mode.state;
+  $("#b-policy").textContent = "POLICY " + d.proof.policy_version;
+  $("#state").textContent = d.snapshot
+    ? JSON.stringify(d.snapshot, null, 2)
+    : "No snapshot — the gate denied this request before any state was acquired.";
+  $("#calls").textContent =
+    `this evaluation → provider calls: ${d.calls.provider} · proposer calls: ${d.calls.proposer}`;
+
+  const disp = $("#disp");
+  disp.className = "disp " + d.disposition;
+  $("#disp-v").textContent = d.disposition;
+  $("#disp-m").innerHTML = `gate <b>${esc(d.gate.reason_code)}</b>` +
+    (d.proof.failure_reason ? ` · failure <b>${esc(d.proof.failure_reason)}</b>` : "") +
+    `<br><span class="why">produced by the deterministic pipeline, not by the model</span>`;
+
+  $("#marked").innerHTML = marked(d.proof.message, d.coverage.spans);
+
+  $("#verdicts").innerHTML = d.verdicts.length ? d.verdicts.map(v => `
+    <tr>
+      <td class="col-claim"><b>${esc(v.kind)}</b><br>
+        <span class="why">asserts ${val(v.asserted)}</span></td>
+      <td class="col-state">${v.observed ? val(v.observed) : "<span class='why'>no value</span>"}<br>
+        <span class="why">${v.evidence ? esc(JSON.stringify(v.evidence)) : "no evidence cited"}</span></td>
+      <td><span class="st ${esc(v.status)}">${esc(v.status)}</span><br>
+        <span class="why">${esc(v.reason_code)}</span></td>
+    </tr>`).join("") :
+    `<tr><td colspan="3" class="why">No claims adjudicated — see disposition above.</td></tr>`;
+
+  $("#cov-sum").innerHTML = `<span class="st ${d.coverage.passed ? "SUPPORTED":"CONTRADICTED"}">` +
+    `${d.coverage.passed ? "COVERAGE COMPLETE" : "COVERAGE INCOMPLETE"}</span> ` +
+    `<span class="why">${esc(d.coverage.reason)}</span>`;
+  $("#cov").innerHTML = d.coverage.spans.map(s => `
+    <tr><td class="mono">${esc(s.text)}</td><td class="why">${esc(s.kind)}</td>
+        <td class="why">${s.start}–${s.end}</td>
+        <td>${s.covered_by ? esc(s.covered_by)
+          : "<span class='st CONTRADICTED'>UNADJUDICATED</span>"}</td></tr>`).join("")
+    || `<tr><td colspan="4" class="why">No checkable spans detected.</td></tr>`;
+
+  $("#proof").innerHTML = [
+    ["proof", d.proof.proof_id], ["snapshot", d.proof.snapshot_hash || "none acquired"],
+    ["policy", d.proof.policy_version], ["gate", d.gate.decision + " / " + d.gate.reason_code],
+    ["state source", d.proof.state_source || "—"], ["proposer", d.proof.model_id],
+  ].map(([k,v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+  window.__proofId = d.proof.proof_id;
+}
+
+async function verify(){
+  const btn = $("#go"); btn.disabled = true; $("#status").textContent = "evaluating…";
+  try{
+    render(await api("/api/verify", {draft: $("#draft").value,
+      scenario: $("#scenario").value, customer_id: "cus_" + Date.now()}));
+    $("#status").textContent = "";
+  }catch(e){ $("#status").innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+  btn.disabled = false;
+}
+
+function panel(el, d, label, diffKey){
+  const s = d.snapshot && d.snapshot.subscription ? d.snapshot.subscription : {};
+  el.style.display = "";
+  el.innerHTML = `<h3>${esc(label)}</h3>
+    <div class="disp ${d.disposition}" style="margin-bottom:12px">
+      <div class="v" style="font-size:24px">${d.disposition}</div>
+      <div class="m"><span class="why">gate ${esc(d.gate.reason_code)}</span></div></div>
+    <dl class="kv">
+      <dt>attempt_index</dt><dd class="diff">${esc(s.attempt_index)}</dd>
+      <dt>max_attempts</dt><dd>${esc(s.max_attempts)}</dd>
+      <dt>snapshot</dt><dd>${esc((d.proof.snapshot_hash||"").slice(0,24))}…</dd>
+      <dt>proof</dt><dd>${esc(d.proof.proof_id)}</dd>
+    </dl>`;
+}
+
+async function flip(){
+  const b = $("#flip"); b.disabled = true; $("#flipstatus").textContent = "running two evaluations…";
+  try{
+    const draft = $("#draft").value, t = Date.now();
+    const a = await api("/api/verify", {draft, scenario:"final_attempt", customer_id:"flipA_"+t});
+    const c = await api("/api/verify", {draft, scenario:"first_attempt",  customer_id:"flipB_"+t});
+    panel($("#A"), a, "Run A · attempt 4 of 4");
+    panel($("#B"), c, "Run B · attempt 1 of 4");
+    $("#samemsg").style.display = "";
+    $("#samemsg").innerHTML =
+      `Message sent to both runs, byte-identical: <b>${esc(draft)}</b><br>` +
+      `<span class="why">both evaluated through POST /api/verify → Pramaan.evaluate(); ` +
+      `snapshot hashes differ, so the state genuinely differed.</span>`;
+    $("#flipstatus").textContent = "";
+  }catch(e){ $("#flipstatus").innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+  b.disabled = false;
+}
+
+async function replay(){
+  $("#replayout").textContent = "recomputing…";
+  try{
+    const r = await api("/api/recheck", {});
+    const bad = r.results.filter(x => !x.ok);
+    $("#replayout").innerHTML =
+      `<span class="st ${bad.length ? "CONTRADICTED":"SUPPORTED"}">` +
+      `${bad.length ? "INTEGRITY CHECK FAILED" : "ALL PROOFS RE-VERIFIED"}</span>
+       <div class="why" style="margin-top:8px">${r.results.length - bad.length}/${r.results.length}
+       recomputed · send-log ${r.send_log.ok ? "OK" : "FAILED"}</div>` +
+      (bad.length ? `<pre style="margin-top:10px">${esc(bad.map(x =>
+        x.proof_id + "\n  " + x.problems.join("\n  ")).join("\n"))}</pre>` : "") +
+      `<p class="note">${esc(r.note)}</p>`;
+  }catch(e){ $("#replayout").innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+}
+
+async function raw(){
+  const el = $("#rawout");
+  if (el.style.display !== "none"){ el.style.display = "none"; return; }
+  el.style.display = ""; el.textContent = "loading…";
+  try{ el.textContent = JSON.stringify(await api("/api/proof/" + window.__proofId), null, 2); }
+  catch(e){ el.textContent = e.message; }
+}
+
+(async function init(){
+  $("#go").onclick = verify; $("#flip").onclick = flip;
+  $("#replay").onclick = replay; $("#raw").onclick = raw;
+  try{
+    const l = await api("/api/limitations");
+    $("#b-model").textContent = l.mode.model;
+    $("#b-state").textContent = l.mode.state;
+    $("#lim-mode").textContent = l.mode.note;
+    $("#lim").innerHTML = l.not_proven.map(x => `<li>${esc(x)}</li>`).join("");
+  }catch(e){ $("#lim").innerHTML = `<li class="err">${esc(e.message)}</li>`; }
+})();
+</script>
+</body>
+</html>

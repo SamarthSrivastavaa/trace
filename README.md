@@ -56,7 +56,8 @@ Honest novelty score for the mechanism: low. The domain transfer and trust model
 pip install -r requirements.txt
 python -m pramaan demo                       # all four beats + cooldown lifecycle
 python -m pramaan recheck --db pramaan.db --all
-python -m pytest tests/ -q                   # 391 tests, fully offline
+python -m pytest tests/ -q                   # 422 tests, fully offline
+python -m pramaan serve                      # local web UI on 127.0.0.1:8000
 ```
 
 The default configuration is fully simulated. `python -m pramaan status` prints the mode banner; simulated state is never displayed as live.
@@ -156,10 +157,11 @@ retry commit             → already_committed, still one row
 
 | Component | Status |
 |---|---|
-| Deterministic core | **Working**, 391 offline tests |
+| Deterministic core | **Working**, 422 offline tests |
+| Web UI | **Working**, offline. A rendering layer only — it computes no verdict, disposition, coverage or policy decision; `tests/test_web.py` enforces this by AST and by comparing every API response against a direct `Pramaan.evaluate()` call |
 | Fixture state provider | **Working**, SIMULATED, no credentials |
 | Anthropic proposer | **Adapter complete, tested against a fake transport. No live call has ever been made.** |
-| Razorpay state provider | **Boundary skeleton only.** 8 of 12 field mappings unresolved; `get_state` raises rather than guessing endpoint shapes |
+| Razorpay state provider | **Boundary skeleton only.** 9 of 12 field mappings unresolved; `get_state` raises rather than guessing endpoint shapes |
 | Delivery transport | **`SimulatedSender` only.** No vendor integration exists |
 
 ## Kill test
@@ -192,17 +194,19 @@ Frozen at `phase3-freeze` = `8b0d3753`, dataset `f3b65c56…`, prompt `proposer-
 ## Testing
 
 ```bash
-python -m pytest tests/ -q          # 391 tests, ~17s, no credentials, no network
+python -m pytest tests/ -q          # 422 tests, ~20s, no credentials, no network
 ```
 
 | Area | Tests |
 |---|---|
-| Repo integrity & architecture boundaries | 91 |
+| Repo integrity & architecture boundaries | 96 |
 | LLM adapter | 43 |
 | Storage & send lifecycle | 39 |
 | Policy gate | 34 |
+| Documentation honesty | 33 |
 | App & CLI | 30 |
 | Kill-test harness | 26 |
+| Web UI boundary | 26 |
 | Policy loading & identity | 25 |
 | State provider | 25 |
 | Rules, coverage, boundary, normalise, demo beats | 45 |
@@ -214,7 +218,7 @@ python -m pytest tests/ -q          # 391 tests, ~17s, no credentials, no networ
 ```
 pramaan/
   app.py          composition root — wires the chain, decides nothing
-  cli.py          python -m pramaan {status,evaluate,send,proof,suppress,recheck,demo}
+  cli.py          python -m pramaan {status,evaluate,send,proof,suppress,recheck,demo,serve}
   config.py       selectors only, holds no secrets
   core/
     pipeline.py   the six stages
@@ -223,6 +227,7 @@ pramaan/
   state/          AuthoritativeStateProvider contract + fixture provider
   llm/            Anthropic proposal adapter: prompt · client · propose · errors
   storage/db.py   append-only SQLite
+  web/            stdlib HTTP boundary + one self-contained page — renders, decides nothing
   delivery.py     the SEND-is-not-delivery boundary
 recheck.py        offline replay — the only replay implementation
 killtest/         frozen benchmark (do not modify)

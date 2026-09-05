@@ -7,6 +7,7 @@
     python -m pramaan suppress --customer c1
     python -m pramaan recheck --all
     python -m pramaan demo
+    python -m pramaan serve                      # local web UI, same engine
 
 Defaults are fully simulated: no credentials, no network. Every command prints
 a MODE banner so simulated state can never be mistaken for live.
@@ -126,6 +127,14 @@ def cmd_recheck(args) -> int:
     return recheck.main(argv)
 
 
+def cmd_serve(args) -> int:
+    """Local web UI. Same evaluation path; the browser decides nothing."""
+    from .web.server import serve
+    cfg = AppConfig.from_env(db_path=args.db, state_provider=args.state_provider,
+                             proposer=args.proposer, policy_path=args.policy)
+    return serve(cfg, host=args.host, port=args.port)
+
+
 def cmd_demo(args) -> int:
     """The four beats plus the cooldown lifecycle. Fully simulated."""
     from .fixtures import scenarios as fx
@@ -210,6 +219,11 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--proof-id", dest="proof_id")
     sp.add_argument("--allow-policy-drift", action="store_true")
     sp.set_defaults(func=cmd_recheck)
+
+    sp = sub.add_parser("serve")
+    sp.add_argument("--host", default="127.0.0.1")
+    sp.add_argument("--port", type=int, default=8000)
+    sp.set_defaults(func=cmd_serve)
 
     sub.add_parser("demo").set_defaults(func=cmd_demo)
     return p
